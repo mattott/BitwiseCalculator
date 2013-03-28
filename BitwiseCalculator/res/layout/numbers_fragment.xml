@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="com.ott.matt.bwc.NumbersFragment"
+    android:id="@+id/numbers_fragment"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:numColumns="4"
+    android:verticalSpacing="0dp"
+    android:horizontalSpacing="0dp"
+    android:stretchMode="columnWidth"
+    android:gravity="center" />

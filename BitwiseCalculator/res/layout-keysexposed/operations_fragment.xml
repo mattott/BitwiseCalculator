@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+ 	<Keyboard
+ 	    android:id="@+id/binary_key" >
+	<Row >
+		<Key android:keyLabel="0" />
+		<Key android:keyLabel="1" />
+	</Row>
+	<Row>
+	    <Key android:keyLabel="\\u003c\\u003c" />
+	    <Key android:keyLabel="\\u003e\\u003e" />
+	    <Key android:keyLabel="\\u007c" />
+	</Row>
+	<Row>
+	    <Key android:keyLabel="\\u0026" />
+	    <Key android:keyLabel="\\u005e" />
+	</Row>
+	</Keyboard>
+	<Keyboard
+ 	    android:id="@+id/decimal_key" >
+	<Row >
+		<Key android:keyLabel="1" />
+		<Key android:keyLabel="2" />
+		<Key android:keyLabel="3" />
+	</Row>
+	<Row >
+		<Key android:keyLabel="4" />
+		<Key android:keyLabel="5" />
+		<Key android:keyLabel="6" />
+	</Row>
+	<Row >
+		<Key android:keyLabel="7" />
+		<Key android:keyLabel="8" />
+		<Key android:keyLabel="9" />
+	</Row>
+	<Row >
+		<Key android:keyLabel="0" />
+	</Row>
+	<Row >
+	    <Key android:keyLabel="\\u003c\\u003c" />
+	    <Key android:keyLabel="\\u003e\\u003e" />
+	    <Key android:keyLabel="\\u007c" />
+	    <Key android:keyLabel="\\u0026" />
+	    <Key android:keyLabel="\\u005e" />
+	</Row>
+	</Keyboard>
+ 
+</LinearLayout>
