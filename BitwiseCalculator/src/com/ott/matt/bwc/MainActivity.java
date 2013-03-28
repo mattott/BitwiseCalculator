@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 
 public class MainActivity extends FragmentActivity implements NumbersFragment.OnNumberPressedListener{
-	String mCurText = "0";
+	CharSequence mCurText = "0";
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -20,9 +20,8 @@ public class MainActivity extends FragmentActivity implements NumbersFragment.On
 		FragmentManager fm = getSupportFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
 		//instantiate the fragments
-		DisplayFragment displayFragment = DisplayFragment.newInstance(mCurText);
+		DisplayFragment displayFragment = DisplayFragment.newInstance(mCurText.toString());
 		NumbersFragment numbersFragment = new NumbersFragment();
-		
 		// add the all fragment instances to the ViewGroup
 		ft.add(R.id.display_container, displayFragment);
 		ft.add(R.id.numbers_container, numbersFragment);
@@ -34,7 +33,7 @@ public class MainActivity extends FragmentActivity implements NumbersFragment.On
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putString("curText", mCurText);
+		outState.putCharSequence("curText", mCurText);
 	}
 	
 	@Override
@@ -45,16 +44,33 @@ public class MainActivity extends FragmentActivity implements NumbersFragment.On
 	}
 
 	@Override
-	public void onNumberPressed(String keyText) {
+	public void onNumberPressed(CharSequence keyText) {
 		// append the input text to the current text
-		mCurText += keyText;
+		if (keyText == "DELETE") {
+			if (mCurText.length() > 1) {
+				mCurText = mCurText.subSequence(0, mCurText.length()-1);
+			} //else if (mCurText.charAt(mCurText.length()) == ' ') {
+				//mCurText = mCurText.subSequence(0, mCurText.length()-3);} 
+			else {
+				mCurText = "0";
+			}
+		} else if(keyText == ">>" || keyText == "<<" || keyText == "^" || keyText == "|"
+				|| keyText == "&" || keyText == "~") {
+			mCurText = (CharSequence) mCurText.toString() + " " + keyText.toString() + " ";
+		} else if (mCurText == "0") {
+			mCurText = keyText;
+		} else {
+			mCurText = (CharSequence) mCurText.toString() + keyText.toString();
+		}
+	
 		FragmentManager fm = getSupportFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
 		// replace old instance of DisplayFragment with the new text
-		DisplayFragment displayFragment = DisplayFragment.newInstance(mCurText);
+		DisplayFragment displayFragment = DisplayFragment.newInstance(mCurText.toString());
 		ft.replace(R.id.display_container, displayFragment);
 		// commit the change
 		ft.commit();
 	}
+	
 
 }

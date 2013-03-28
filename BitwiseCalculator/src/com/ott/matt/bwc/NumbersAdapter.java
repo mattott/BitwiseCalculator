@@ -50,7 +50,9 @@ public class NumbersAdapter extends BaseAdapter{
 		return numView;
 	}
 	// Create and populate number buttons array with KeypadButton values
-	private KeypadButton[] mNums = { KeypadButton.ZERO, KeypadButton.ONE, KeypadButton.TWO,
+	private KeypadButton[] mNums = {KeypadButton.SHIFT_LEFT, KeypadButton.SHIFT_RIGHT, KeypadButton.CALCULATE,
+			KeypadButton.BACKSPACE, KeypadButton.OR, KeypadButton.AND, KeypadButton.XOR, KeypadButton.NOT,
+			KeypadButton.ZERO, KeypadButton.ONE, KeypadButton.TWO,
 	 KeypadButton.THREE, KeypadButton.FOUR, KeypadButton.FIVE,KeypadButton.SIX,
 	 KeypadButton.SEVEN, KeypadButton.EIGHT, KeypadButton.NINE, KeypadButton.TEN,KeypadButton.ELEVEN, 
 	 KeypadButton.TWELVE, KeypadButton.THIRTEEN,KeypadButton.FOURTEEN, KeypadButton.FIFTEEN};

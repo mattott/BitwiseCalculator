@@ -14,7 +14,7 @@ public class NumbersFragment extends Fragment{
 	OnNumberPressedListener mListener;
 
 	public interface OnNumberPressedListener {
-		public void onNumberPressed(String keyText);
+		public void onNumberPressed(CharSequence keyText);
 	}
 	
 	@Override
@@ -38,7 +38,7 @@ public class NumbersFragment extends Fragment{
 		public void onClick(View v) {
 			Button btn = (Button) v;
 			KeypadButton keypadButton = (KeypadButton)btn.getTag();
-			mListener.onNumberPressed(keypadButton.getText().toString());
+			mListener.onNumberPressed(keypadButton.getText());
 		}});
 		
 		return gridView;

@@ -7,13 +7,13 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    android:colorBackground="#000000"
     tools:context=".MainActivity">
 	<FrameLayout
 	    android:name="com.ott.matt.bwc.DisplayFragment"
 	    android:id="@+id/display_container"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content" />
+
     <fragment 
         android:name="com.ott.matt.bwc.NumbersFragment"
         android:id="@+id/numbers_container"
