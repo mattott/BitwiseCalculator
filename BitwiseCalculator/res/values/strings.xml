@@ -3,6 +3,29 @@
 
     <string name="app_name">BitwiseCalculator</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="ONE">1</string>
+    <string name="TWO">2</string>
+    <string name="THREE">3</string>
+    <string name="FOUR">4</string>
+    <string name="FIVE">5</string>
+    <string name="SIX">6</string>
+    <string name="SEVEN">7</string>
+    <string name="EIGHT">8</string>
+    <string name="NINE">9</string>
+    <string name="TEN">A</string>
+    <string name="ELEVEN">B</string>
+    <string name="TWELVE">C</string>
+    <string name="THIRTEEN">D</string>
+    <string name="FOURTEEN">E</string>
+    <string name="FIFTEEN">F</string>
+    <string name="ZERO">0</string>
+    <string name="SHIFT_LEFT">&#60;&#60;</string>
+    <string name="SHIFT_RIGHT">&#62;&#62;</string>
+    <string name="AND">&amp;</string>
+    <string name="OR">|</string>
+    <string name="XOR">&#94;</string>
+    <string name="NOT">&#126;</string>
+    <string name="CALCULATE">&#61;</string>
+    <string name="DELETE">DELETE</string>
 
 </resources>
