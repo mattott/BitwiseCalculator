@@ -16,6 +16,9 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 	String mCurText = "";
 	boolean hasOperator = false;
+	Integer[] buttonResources;
+	ArrayAdapter<String> aa;
+	ArrayList<String> arrayList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -25,10 +28,8 @@ public class MainActivity extends Activity {
 		GridView gV = (GridView) findViewById(R.id.keypad_view);
 		final TextView tV = (TextView) findViewById(R.id.display_view);
 		final ArrayList<String> arrayList = new ArrayList<String>();
-		for (int i = 0; i < buttonResources.length; i++) {
-			arrayList.add(getString(buttonResources[i]));
-		}
-		ArrayAdapter<String> aa = new ArrayAdapter<String>(this,
+		updateDataSet(binResources);
+		aa = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, arrayList);
 		OnItemClickListener mClickListener = new OnItemClickListener() {
 			@Override
@@ -63,6 +64,14 @@ public class MainActivity extends Activity {
 												// saves
 		outState.putString("curText", mCurText);
 	}
+	
+	public void updateDataSet(Integer[] newResources) {
+		arrayList.clear();
+		buttonResources = newResources;
+		for (int i = 0; i < buttonResources.length; i++) {
+			arrayList.add(getString(buttonResources[i]));
+		}
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -76,27 +85,39 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.bin:
 			if (item.isChecked())
-				item.setChecked(false);
-			else
+				return true;
+			else {
 				item.setChecked(true);
+				updateDataSet(binResources);
+				aa.notifyDataSetChanged();
+			}
 			return true;
 		case R.id.oct:
 			if (item.isChecked())
-				item.setChecked(false);
-			else
+				return true;
+			else {
 				item.setChecked(true);
+				updateDataSet(octResources);
+				aa.notifyDataSetChanged();
+			}
 			return true;
 		case R.id.dec:
 			if (item.isChecked())
-				item.setChecked(false);
-			else
+				return true;
+			else {
 				item.setChecked(true);
+				updateDataSet(decResources);
+				aa.notifyDataSetChanged();
+			}
 			return true;
 		case R.id.hex:
 			if (item.isChecked())
-				item.setChecked(false);
-			else
+				return true;
+			else {
 				item.setChecked(true);
+				updateDataSet(hexResources);
+				aa.notifyDataSetChanged();
+			}
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -197,7 +218,22 @@ public class MainActivity extends Activity {
 		return Integer.toString(~val);
 	}
 
-	private final Integer[] buttonResources = { R.string.SHIFT_LEFT,
+	private final Integer[] binResources = { R.string.SHIFT_LEFT,
+			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
+			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT,
+			R.string.ZERO, R.string.ONE };
+	private final Integer[] octResources = { R.string.SHIFT_LEFT,
+			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
+			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT,
+			R.string.ZERO, R.string.ONE, R.string.TWO, R.string.THREE,
+			R.string.FOUR, R.string.FIVE, R.string.SIX, R.string.SEVEN, };
+	private final Integer[] decResources = { R.string.SHIFT_LEFT,
+			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
+			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT,
+			R.string.ZERO, R.string.ONE, R.string.TWO, R.string.THREE,
+			R.string.FOUR, R.string.FIVE, R.string.SIX, R.string.SEVEN,
+			R.string.EIGHT, R.string.NINE };
+	private final Integer[] hexResources = { R.string.SHIFT_LEFT,
 			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
 			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT,
 			R.string.ZERO, R.string.ONE, R.string.TWO, R.string.THREE,

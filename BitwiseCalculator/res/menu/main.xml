@@ -2,7 +2,8 @@
 
    <group android:checkableBehavior="single">
         <item android:id="@+id/bin"
-              android:title="@string/bin" />
+              android:title="@string/bin"
+              android:checked="true" />
         <item android:id="@+id/oct"
               android:title="@string/oct" />
         <item android:id="@+id/dec"
