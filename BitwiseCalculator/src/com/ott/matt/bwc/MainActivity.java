@@ -15,11 +15,12 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	String mCurText = "";
+	TextView tV;
+	int base = 2;
 	boolean hasOperator = false;
 	Integer[] buttonResources;
 	private ArrayAdapter<String> aa;
 	private ArrayList<String> arrayList = new ArrayList<String>();
-	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +28,7 @@ public class MainActivity extends Activity {
 		// inflate the view
 		setContentView(R.layout.activity_main);
 		GridView gV = (GridView) findViewById(R.id.keypad_view);
-		final TextView tV = (TextView) findViewById(R.id.display_view);
+		tV = (TextView) findViewById(R.id.display_view);
 		buttonResources = binResources;
 		for (int i = 0; i < operators.length; i++) {
 			arrayList.add(getString(operators[i]));
@@ -70,7 +71,7 @@ public class MainActivity extends Activity {
 
 	public void updateDataSet(Integer[] newResources) {
 		int i = arrayList.size() - 1;
-		while(i >= operators.length) {
+		while (i >= operators.length) {
 			arrayList.remove(i);
 			i = arrayList.size() - 1;
 		}
@@ -78,6 +79,9 @@ public class MainActivity extends Activity {
 		for (int j = 0; j < newResources.length; j++) {
 			arrayList.add(getString(newResources[j]));
 		}
+		mCurText = "";
+		hasOperator = false;
+		tV.setText(mCurText);
 		aa.notifyDataSetChanged();
 	}
 
@@ -96,6 +100,7 @@ public class MainActivity extends Activity {
 				item.setChecked(false);
 			else {
 				item.setChecked(true);
+				base = 2;
 				updateDataSet(binResources);
 			}
 			break;
@@ -104,6 +109,7 @@ public class MainActivity extends Activity {
 				break;
 			else {
 				item.setChecked(true);
+				base = 8;
 				updateDataSet(octResources);
 			}
 			break;
@@ -112,6 +118,7 @@ public class MainActivity extends Activity {
 				break;
 			else {
 				item.setChecked(true);
+				base = 10;
 				updateDataSet(decResources);
 			}
 			break;
@@ -120,6 +127,7 @@ public class MainActivity extends Activity {
 				break;
 			else {
 				item.setChecked(true);
+				base = 16;
 				updateDataSet(hexResources);
 			}
 			break;
@@ -149,37 +157,59 @@ public class MainActivity extends Activity {
 	}
 
 	public String onCalculate() {
+		hasOperator = false;
 		String[] parts;
 		int val, bitmask;
+		String prefix;
+		String bin = "0b";
+		String oct = "0";
+		String dec = "";
+		String hex = "0x";
+		switch (base) {
+		case 2:
+			prefix = bin;
+			break;
+		case 8:
+			prefix = oct;
+			break;
+		case 10:
+			prefix = dec;
+			break;
+		case 16:
+			prefix = hex;
+			break;
+		default:
+			prefix = bin;
+		}
 
 		if (mCurText.contains("<<")) {
 			parts = mCurText.split("<<");
-			val = Integer.parseInt(parts[0]);
-			bitmask = Integer.parseInt(parts[1]);
+			val = Integer.decode(prefix + parts[0]);
+			bitmask = Integer.decode(prefix + parts[1]);
 			return bitwiseShiftLeft(val, bitmask);
 		} else if (mCurText.contains(">>")) {
 			parts = mCurText.split(">>");
-			val = Integer.parseInt(parts[0]);
-			bitmask = Integer.parseInt(parts[1]);
+			val = Integer.decode(prefix + parts[0]);
+			bitmask = Integer.decode(prefix + parts[1]);
 			return bitwiseShiftRight(val, bitmask);
 		} else if (mCurText.contains("|")) {
 			parts = mCurText.split("|");
-			val = Integer.parseInt(parts[0]);
-			bitmask = Integer.parseInt(parts[1]);
+			val = Integer.decode(prefix + parts[0]);
+			bitmask = Integer.decode(prefix + parts[1]);
 			return bitwiseOr(val, bitmask);
 		} else if (mCurText.contains("&")) {
 			parts = mCurText.split("&");
-			val = Integer.parseInt(parts[0]);
-			bitmask = Integer.parseInt(parts[1]);
+			val = Integer.decode(prefix + parts[0]);
+			bitmask = Integer.decode(prefix + parts[1]);
 			return bitwiseAnd(val, bitmask);
 		} else if (mCurText.contains("^")) {
 			parts = mCurText.split("^");
-			val = Integer.parseInt(parts[0]);
-			bitmask = Integer.parseInt(parts[1]);
+			val = Integer.decode(prefix + parts[0]);
+			bitmask = Integer.decode(prefix + parts[1]);
 			return bitwiseXor(val, bitmask);
 		} else if (mCurText.contains("~")) {
-			val = Integer.parseInt(mCurText.subSequence(1, mCurText.length())
-					.toString());
+			val = Integer.decode(prefix
+					+ mCurText.subSequence(1, mCurText.length()).toString());
 			return bitwiseComplement(val);
 		} else {
 			return mCurText;
@@ -222,7 +252,7 @@ public class MainActivity extends Activity {
 	public String bitwiseComplement(int val) {
 		return Integer.toString(~val);
 	}
-	
+
 	private final Integer[] operators = { R.string.SHIFT_LEFT,
 			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
 			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT };
