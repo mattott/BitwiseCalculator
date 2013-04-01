@@ -17,8 +17,9 @@ public class MainActivity extends Activity {
 	String mCurText = "";
 	boolean hasOperator = false;
 	Integer[] buttonResources;
-	ArrayAdapter<String> aa;
-	ArrayList<String> arrayList;
+	private ArrayAdapter<String> aa;
+	private ArrayList<String> arrayList = new ArrayList<String>();
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +28,13 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		GridView gV = (GridView) findViewById(R.id.keypad_view);
 		final TextView tV = (TextView) findViewById(R.id.display_view);
-		final ArrayList<String> arrayList = new ArrayList<String>();
-		updateDataSet(binResources);
+		buttonResources = binResources;
+		for (int i = 0; i < operators.length; i++) {
+			arrayList.add(getString(operators[i]));
+		}
+		for (int i = 0; i < buttonResources.length; i++) {
+			arrayList.add(getString(buttonResources[i]));
+		}
 		aa = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, arrayList);
 		OnItemClickListener mClickListener = new OnItemClickListener() {
@@ -36,17 +42,14 @@ public class MainActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
 				String text;
-				if (buttonResources[position] == R.string.DELETE) {
-					text = onDelete();
-				} else if (buttonResources[position] == R.string.CALCULATE) {
-					text = onCalculate();
-				} else if (buttonResources[position] == R.string.AND
-						| buttonResources[position] == R.string.OR
-						| buttonResources[position] == R.string.XOR
-						| buttonResources[position] == R.string.NOT
-						| buttonResources[position] == R.string.SHIFT_RIGHT
-						| buttonResources[position] == R.string.SHIFT_LEFT) {
-					text = onOperation(arrayList.get(position));
+				if (position < operators.length) {
+					if (operators[position] == R.string.DELETE) {
+						text = onDelete();
+					} else if (operators[position] == R.string.CALCULATE) {
+						text = onCalculate();
+					} else {
+						text = onOperation(arrayList.get(position));
+					}
 				} else {
 					text = onNumber(arrayList.get(position));
 				}
@@ -64,13 +67,18 @@ public class MainActivity extends Activity {
 												// saves
 		outState.putString("curText", mCurText);
 	}
-	
+
 	public void updateDataSet(Integer[] newResources) {
-		arrayList.clear();
-		buttonResources = newResources;
-		for (int i = 0; i < buttonResources.length; i++) {
-			arrayList.add(getString(buttonResources[i]));
+		int i = arrayList.size() - 1;
+		while(i >= operators.length) {
+			arrayList.remove(i);
+			i = arrayList.size() - 1;
 		}
+		buttonResources = newResources;
+		for (int j = 0; j < newResources.length; j++) {
+			arrayList.add(getString(newResources[j]));
+		}
+		aa.notifyDataSetChanged();
 	}
 
 	@Override
@@ -85,43 +93,40 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.bin:
 			if (item.isChecked())
-				return true;
+				item.setChecked(false);
 			else {
 				item.setChecked(true);
 				updateDataSet(binResources);
-				aa.notifyDataSetChanged();
 			}
-			return true;
+			break;
 		case R.id.oct:
 			if (item.isChecked())
-				return true;
+				break;
 			else {
 				item.setChecked(true);
 				updateDataSet(octResources);
-				aa.notifyDataSetChanged();
 			}
-			return true;
+			break;
 		case R.id.dec:
 			if (item.isChecked())
-				return true;
+				break;
 			else {
 				item.setChecked(true);
 				updateDataSet(decResources);
-				aa.notifyDataSetChanged();
 			}
-			return true;
+			break;
 		case R.id.hex:
 			if (item.isChecked())
-				return true;
+				break;
 			else {
 				item.setChecked(true);
 				updateDataSet(hexResources);
-				aa.notifyDataSetChanged();
 			}
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
+			break;
 		}
+
+		return super.onOptionsItemSelected(item);
+
 	}
 
 	public String onDelete() {
@@ -217,28 +222,20 @@ public class MainActivity extends Activity {
 	public String bitwiseComplement(int val) {
 		return Integer.toString(~val);
 	}
-
-	private final Integer[] binResources = { R.string.SHIFT_LEFT,
+	
+	private final Integer[] operators = { R.string.SHIFT_LEFT,
 			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
-			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT,
-			R.string.ZERO, R.string.ONE };
-	private final Integer[] octResources = { R.string.SHIFT_LEFT,
-			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
-			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT,
-			R.string.ZERO, R.string.ONE, R.string.TWO, R.string.THREE,
-			R.string.FOUR, R.string.FIVE, R.string.SIX, R.string.SEVEN, };
-	private final Integer[] decResources = { R.string.SHIFT_LEFT,
-			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
-			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT,
-			R.string.ZERO, R.string.ONE, R.string.TWO, R.string.THREE,
-			R.string.FOUR, R.string.FIVE, R.string.SIX, R.string.SEVEN,
-			R.string.EIGHT, R.string.NINE };
-	private final Integer[] hexResources = { R.string.SHIFT_LEFT,
-			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
-			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT,
-			R.string.ZERO, R.string.ONE, R.string.TWO, R.string.THREE,
-			R.string.FOUR, R.string.FIVE, R.string.SIX, R.string.SEVEN,
-			R.string.EIGHT, R.string.NINE, R.string.TEN, R.string.ELEVEN,
-			R.string.TWELVE, R.string.THIRTEEN, R.string.FOURTEEN,
-			R.string.FIFTEEN };
+			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT };
+	private final Integer[] binResources = { R.string.ZERO, R.string.ONE };
+	private final Integer[] octResources = { R.string.ZERO, R.string.ONE,
+			R.string.TWO, R.string.THREE, R.string.FOUR, R.string.FIVE,
+			R.string.SIX, R.string.SEVEN, };
+	private final Integer[] decResources = { R.string.ZERO, R.string.ONE,
+			R.string.TWO, R.string.THREE, R.string.FOUR, R.string.FIVE,
+			R.string.SIX, R.string.SEVEN, R.string.EIGHT, R.string.NINE };
+	private final Integer[] hexResources = { R.string.ZERO, R.string.ONE,
+			R.string.TWO, R.string.THREE, R.string.FOUR, R.string.FIVE,
+			R.string.SIX, R.string.SEVEN, R.string.EIGHT, R.string.NINE,
+			R.string.TEN, R.string.ELEVEN, R.string.TWELVE, R.string.THIRTEEN,
+			R.string.FOURTEEN, R.string.FIFTEEN };
 }
