@@ -16,10 +16,13 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 	String mCurText = "";
 	TextView tV;
+	// initialize the radix to binary
 	int radix = 2;
+	// allows new operators to be called on operands
 	boolean hasOperator = false;
 	Integer[] buttonResources;
 	private ArrayAdapter<String> aa;
+	// this must be initialized outside of onCreate in order to update
 	private ArrayList<String> arrayList = new ArrayList<String>();
 
 	@Override
@@ -27,17 +30,35 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		// inflate the view
 		setContentView(R.layout.activity_main);
+		// initialize the grid and text views
 		GridView gV = (GridView) findViewById(R.id.keypad_view);
 		tV = (TextView) findViewById(R.id.display_view);
-		buttonResources = binResources;
+		// keypad numbers depends on radix
+		switch (radix) {
+		case 2:
+			buttonResources = binResources;
+			break;
+		case 8:
+			buttonResources = octResources;
+			break;
+		case 16:
+			buttonResources = hexResources;
+			break;
+		default:
+			buttonResources = decResources;
+		}
+		// add the operator strings to the arraylist
 		for (int i = 0; i < operators.length; i++) {
 			arrayList.add(getString(operators[i]));
 		}
+		// add the number keys to the arraylist
 		for (int i = 0; i < buttonResources.length; i++) {
 			arrayList.add(getString(buttonResources[i]));
 		}
+		// bind the arraylist to the arrayadapter
 		aa = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, arrayList);
+		// clicklistener calls operator methods
 		OnItemClickListener mClickListener = new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v,
@@ -58,6 +79,7 @@ public class MainActivity extends Activity {
 				tV.setText(text);
 			}
 		};
+		// bind keypad adapter to gridview
 		gV.setAdapter(aa);
 		gV.setOnItemClickListener(mClickListener);
 	}
@@ -69,17 +91,21 @@ public class MainActivity extends Activity {
 		outState.putString("curText", mCurText);
 	}
 
+	// update the arraylist and refresh gridview on base change
 	public void updateDataSet(Integer[] newResources) {
 		int i = arrayList.size() - 1;
+		// remove the old base numbers
 		while (i >= operators.length) {
 			arrayList.remove(i);
 			i = arrayList.size() - 1;
 		}
 		buttonResources = newResources;
+		// add the new base numbers
 		for (int j = 0; j < newResources.length; j++) {
 			arrayList.add(getString(newResources[j]));
 		}
 		mCurText = "";
+		// allow a new operator to be called
 		hasOperator = false;
 		tV.setText(mCurText);
 		aa.notifyDataSetChanged();
@@ -92,6 +118,7 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	// options menu allows user to change the number base
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -137,17 +164,18 @@ public class MainActivity extends Activity {
 
 	}
 
+	// deletes the last keypad button
 	public String onDeletePressed() {
 		if (mCurText.length() > 1) {
 			if (mCurText.charAt(mCurText.length() - 1) == '<'
-					| mCurText.charAt(mCurText.length() - 1) == '>') {
+					|| mCurText.charAt(mCurText.length() - 1) == '>') {
 				hasOperator = false;
 				return (String) mCurText.subSequence(0, mCurText.length() - 2);
 			} else {
 				if (mCurText.charAt(mCurText.length() - 1) == '|'
-						| mCurText.charAt(mCurText.length() - 1) == '&'
-						| mCurText.charAt(mCurText.length() - 1) == '^'
-						| mCurText.charAt(mCurText.length() - 1) == '~')
+						|| mCurText.charAt(mCurText.length() - 1) == '&'
+						|| mCurText.charAt(mCurText.length() - 1) == '^'
+						|| mCurText.charAt(mCurText.length() - 1) == '~')
 					hasOperator = false;
 				return (String) mCurText.subSequence(0, mCurText.length() - 1);
 			}
@@ -156,45 +184,49 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	// calls the bitwise operation(s) on the operand(s)
 	public String onCalculatePressed() {
 		hasOperator = false;
 		String[] parts;
 		int val, bitmask;
+		boolean endsWithNumber = String.valueOf(
+				mCurText.charAt(mCurText.length() - 1))
+				.matches(("[0-9a-zA-Z]"));
 
-		if (mCurText.contains("<<")) {
+		if (mCurText.contains("<<") && endsWithNumber) {
 			parts = mCurText.split("<<");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
-			return bitwiseShiftLeft(val, bitmask);
-		} else if (mCurText.contains(">>")) {
+			bitwiseShiftLeft(val, bitmask);
+		} else if (mCurText.contains(">>") && endsWithNumber) {
 			parts = mCurText.split(">>");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
-			return bitwiseShiftRight(val, bitmask);
-		} else if (mCurText.contains("|")) {
-			parts = mCurText.split("|");
+			bitwiseShiftRight(val, bitmask);
+		} else if (mCurText.contains("|") && endsWithNumber) { 
+			parts = mCurText.split("\\|");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
-			return bitwiseOr(val, bitmask);
-		} else if (mCurText.contains("&")) {
+			bitwiseOr(val, bitmask);
+		} else if (mCurText.contains("&") && endsWithNumber) {
 			parts = mCurText.split("&");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
-			return bitwiseAnd(val, bitmask);
-		} else if (mCurText.contains("^")) {
-			parts = mCurText.split("^");
+			bitwiseAnd(val, bitmask);
+		} else if (mCurText.contains("^") && endsWithNumber) {
+			parts = mCurText.split("\\^");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
-			return bitwiseXor(val, bitmask);
-		} else if (mCurText.contains("~")) {
+			bitwiseXor(val, bitmask);
+		} else if (mCurText.startsWith("~") && endsWithNumber) {
 			val = Integer.parseInt(mCurText.subSequence(1, mCurText.length())
 					.toString(), radix);
-			return bitwiseComplement(val);
-		} else {
-			return mCurText;
+			bitwiseComplement(val);
 		}
+		return mCurText;
 	}
 
+	// adds the operation text to the display
 	public String onOperationPressed(String keyText) {
 		if (hasOperator) {
 			return mCurText;
@@ -208,30 +240,31 @@ public class MainActivity extends Activity {
 		return mCurText + keyText;
 	}
 
-	public String bitwiseAnd(int val, int bitmask) {
-		return Integer.toString(val & bitmask, radix);
+	public void bitwiseAnd(int val, int bitmask) {
+		mCurText = Integer.toString(val & bitmask, radix);
 	}
 
-	public String bitwiseOr(int val, int bitmask) {
-		return Integer.toString(val | bitmask, radix);
+	public void bitwiseOr(int val, int bitmask) {
+		mCurText = Integer.toString(val | bitmask, radix);
 	}
 
-	public String bitwiseXor(int val, int bitmask) {
-		return Integer.toString(val ^ bitmask, radix);
+	public void bitwiseXor(int val, int bitmask) {
+		mCurText = Integer.toString(val ^ bitmask, radix);
 	}
 
-	public String bitwiseShiftLeft(int val, int bitmask) {
-		return Integer.toString(val << bitmask, radix);
+	public void bitwiseShiftLeft(int val, int bitmask) {
+		mCurText = Integer.toString(val << bitmask, radix);
 	}
 
-	public String bitwiseShiftRight(int val, int bitmask) {
-		return Integer.toString(val >> bitmask, radix);
+	public void bitwiseShiftRight(int val, int bitmask) {
+		mCurText = Integer.toString(val >> bitmask, radix);
 	}
 
-	public String bitwiseComplement(int val) {
-		return Integer.toString(~val, radix);
+	public void bitwiseComplement(int val) {
+		mCurText = Integer.toString(~val, radix);
 	}
 
+	// xml resources for numbers and operators located in res/values/strings.xml
 	private final Integer[] operators = { R.string.SHIFT_LEFT,
 			R.string.SHIFT_RIGHT, R.string.CALCULATE, R.string.DELETE,
 			R.string.OR, R.string.AND, R.string.XOR, R.string.NOT };
