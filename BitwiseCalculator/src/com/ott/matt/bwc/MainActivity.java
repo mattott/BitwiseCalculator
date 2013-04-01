@@ -16,7 +16,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 	String mCurText = "";
 	TextView tV;
-	int base = 2;
+	int radix = 2;
 	boolean hasOperator = false;
 	Integer[] buttonResources;
 	private ArrayAdapter<String> aa;
@@ -45,14 +45,14 @@ public class MainActivity extends Activity {
 				String text;
 				if (position < operators.length) {
 					if (operators[position] == R.string.DELETE) {
-						text = onDelete();
+						text = onDeletePressed();
 					} else if (operators[position] == R.string.CALCULATE) {
-						text = onCalculate();
+						text = onCalculatePressed();
 					} else {
-						text = onOperation(arrayList.get(position));
+						text = onOperationPressed(arrayList.get(position));
 					}
 				} else {
-					text = onNumber(arrayList.get(position));
+					text = onNumberPressed(arrayList.get(position));
 				}
 				mCurText = text;
 				tV.setText(text);
@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
 				item.setChecked(false);
 			else {
 				item.setChecked(true);
-				base = 2;
+				radix = 2;
 				updateDataSet(binResources);
 			}
 			break;
@@ -109,7 +109,7 @@ public class MainActivity extends Activity {
 				break;
 			else {
 				item.setChecked(true);
-				base = 8;
+				radix = 8;
 				updateDataSet(octResources);
 			}
 			break;
@@ -118,7 +118,7 @@ public class MainActivity extends Activity {
 				break;
 			else {
 				item.setChecked(true);
-				base = 10;
+				radix = 10;
 				updateDataSet(decResources);
 			}
 			break;
@@ -127,7 +127,7 @@ public class MainActivity extends Activity {
 				break;
 			else {
 				item.setChecked(true);
-				base = 16;
+				radix = 16;
 				updateDataSet(hexResources);
 			}
 			break;
@@ -137,7 +137,7 @@ public class MainActivity extends Activity {
 
 	}
 
-	public String onDelete() {
+	public String onDeletePressed() {
 		if (mCurText.length() > 1) {
 			if (mCurText.charAt(mCurText.length() - 1) == '<'
 					| mCurText.charAt(mCurText.length() - 1) == '>') {
@@ -156,67 +156,46 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	public String onCalculate() {
+	public String onCalculatePressed() {
 		hasOperator = false;
 		String[] parts;
 		int val, bitmask;
-		String prefix;
-		String bin = "0b";
-		String oct = "0";
-		String dec = "";
-		String hex = "0x";
-		switch (base) {
-		case 2:
-			prefix = bin;
-			break;
-		case 8:
-			prefix = oct;
-			break;
-		case 10:
-			prefix = dec;
-			break;
-		case 16:
-			prefix = hex;
-			break;
-		default:
-			prefix = bin;
-		}
 
 		if (mCurText.contains("<<")) {
 			parts = mCurText.split("<<");
-			val = Integer.decode(prefix + parts[0]);
-			bitmask = Integer.decode(prefix + parts[1]);
+			val = Integer.parseInt(parts[0], radix);
+			bitmask = Integer.parseInt(parts[1], radix);
 			return bitwiseShiftLeft(val, bitmask);
 		} else if (mCurText.contains(">>")) {
 			parts = mCurText.split(">>");
-			val = Integer.decode(prefix + parts[0]);
-			bitmask = Integer.decode(prefix + parts[1]);
+			val = Integer.parseInt(parts[0], radix);
+			bitmask = Integer.parseInt(parts[1], radix);
 			return bitwiseShiftRight(val, bitmask);
 		} else if (mCurText.contains("|")) {
 			parts = mCurText.split("|");
-			val = Integer.decode(prefix + parts[0]);
-			bitmask = Integer.decode(prefix + parts[1]);
+			val = Integer.parseInt(parts[0], radix);
+			bitmask = Integer.parseInt(parts[1], radix);
 			return bitwiseOr(val, bitmask);
 		} else if (mCurText.contains("&")) {
 			parts = mCurText.split("&");
-			val = Integer.decode(prefix + parts[0]);
-			bitmask = Integer.decode(prefix + parts[1]);
+			val = Integer.parseInt(parts[0], radix);
+			bitmask = Integer.parseInt(parts[1], radix);
 			return bitwiseAnd(val, bitmask);
 		} else if (mCurText.contains("^")) {
 			parts = mCurText.split("^");
-			val = Integer.decode(prefix + parts[0]);
-			bitmask = Integer.decode(prefix + parts[1]);
+			val = Integer.parseInt(parts[0], radix);
+			bitmask = Integer.parseInt(parts[1], radix);
 			return bitwiseXor(val, bitmask);
 		} else if (mCurText.contains("~")) {
-			val = Integer.decode(prefix
-					+ mCurText.subSequence(1, mCurText.length()).toString());
+			val = Integer.parseInt(mCurText.subSequence(1, mCurText.length())
+					.toString(), radix);
 			return bitwiseComplement(val);
 		} else {
 			return mCurText;
 		}
 	}
 
-	public String onOperation(String keyText) {
+	public String onOperationPressed(String keyText) {
 		if (hasOperator) {
 			return mCurText;
 		} else {
@@ -225,32 +204,32 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	public String onNumber(String keyText) {
+	public String onNumberPressed(String keyText) {
 		return mCurText + keyText;
 	}
 
 	public String bitwiseAnd(int val, int bitmask) {
-		return Integer.toString(val & bitmask);
+		return Integer.toString(val & bitmask, radix);
 	}
 
 	public String bitwiseOr(int val, int bitmask) {
-		return Integer.toString(val | bitmask);
+		return Integer.toString(val | bitmask, radix);
 	}
 
 	public String bitwiseXor(int val, int bitmask) {
-		return Integer.toString(val ^ bitmask);
+		return Integer.toString(val ^ bitmask, radix);
 	}
 
 	public String bitwiseShiftLeft(int val, int bitmask) {
-		return Integer.toString(val << bitmask);
+		return Integer.toString(val << bitmask, radix);
 	}
 
 	public String bitwiseShiftRight(int val, int bitmask) {
-		return Integer.toString(val >> bitmask);
+		return Integer.toString(val >> bitmask, radix);
 	}
 
 	public String bitwiseComplement(int val) {
-		return Integer.toString(~val);
+		return Integer.toString(~val, radix);
 	}
 
 	private final Integer[] operators = { R.string.SHIFT_LEFT,
