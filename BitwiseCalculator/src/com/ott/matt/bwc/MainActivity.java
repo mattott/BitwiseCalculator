@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -13,7 +14,8 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-	CharSequence mCurText = "";
+	String mCurText = "";
+	boolean hasOperator = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +36,7 @@ public class MainActivity extends Activity {
 					int position, long id) {
 				String text;
 				if (buttonResources[position] == R.string.DELETE) {
-						text = onDelete();
+					text = onDelete();
 				} else if (buttonResources[position] == R.string.CALCULATE) {
 					text = onCalculate();
 				} else if (buttonResources[position] == R.string.AND
@@ -43,13 +45,11 @@ public class MainActivity extends Activity {
 						| buttonResources[position] == R.string.NOT
 						| buttonResources[position] == R.string.SHIFT_RIGHT
 						| buttonResources[position] == R.string.SHIFT_LEFT) {
-					text = onOperation((CharSequence) (arrayList.get(position))
-							.toString());
+					text = onOperation(arrayList.get(position));
 				} else {
-					text = onNumber((CharSequence) (arrayList.get(position))
-							.toString());
+					text = onNumber(arrayList.get(position));
 				}
-				mCurText = (CharSequence) text;
+				mCurText = text;
 				tV.setText(text);
 			}
 		};
@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState); // takes care of all of the default
 												// saves
-		outState.putCharSequence("curText", mCurText);
+		outState.putString("curText", mCurText);
 	}
 
 	@Override
@@ -71,15 +71,50 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.bin:
+			if (item.isChecked())
+				item.setChecked(false);
+			else
+				item.setChecked(true);
+			return true;
+		case R.id.oct:
+			if (item.isChecked())
+				item.setChecked(false);
+			else
+				item.setChecked(true);
+			return true;
+		case R.id.dec:
+			if (item.isChecked())
+				item.setChecked(false);
+			else
+				item.setChecked(true);
+			return true;
+		case R.id.hex:
+			if (item.isChecked())
+				item.setChecked(false);
+			else
+				item.setChecked(true);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
 	public String onDelete() {
 		if (mCurText.length() > 1) {
-			if (mCurText.charAt(mCurText.length() - 1) == ' ') {
-				if (mCurText.charAt(mCurText.length() - 2) == '<' | mCurText.charAt(mCurText.length() - 2) == '>') {
-					return (String) mCurText.subSequence(0, mCurText.length() - 4);
-				} else {
-					return (String) mCurText.subSequence(0, mCurText.length() - 3);
-				}
+			if (mCurText.charAt(mCurText.length() - 1) == '<'
+					| mCurText.charAt(mCurText.length() - 1) == '>') {
+				hasOperator = false;
+				return (String) mCurText.subSequence(0, mCurText.length() - 2);
 			} else {
+				if (mCurText.charAt(mCurText.length() - 1) == '|'
+						| mCurText.charAt(mCurText.length() - 1) == '&'
+						| mCurText.charAt(mCurText.length() - 1) == '^'
+						| mCurText.charAt(mCurText.length() - 1) == '~')
+					hasOperator = false;
 				return (String) mCurText.subSequence(0, mCurText.length() - 1);
 			}
 		} else {
@@ -88,15 +123,78 @@ public class MainActivity extends Activity {
 	}
 
 	public String onCalculate() {
-		return null;
+		String[] parts;
+		int val, bitmask;
+
+		if (mCurText.contains("<<")) {
+			parts = mCurText.split("<<");
+			val = Integer.parseInt(parts[0]);
+			bitmask = Integer.parseInt(parts[1]);
+			return bitwiseShiftLeft(val, bitmask);
+		} else if (mCurText.contains(">>")) {
+			parts = mCurText.split(">>");
+			val = Integer.parseInt(parts[0]);
+			bitmask = Integer.parseInt(parts[1]);
+			return bitwiseShiftRight(val, bitmask);
+		} else if (mCurText.contains("|")) {
+			parts = mCurText.split("|");
+			val = Integer.parseInt(parts[0]);
+			bitmask = Integer.parseInt(parts[1]);
+			return bitwiseOr(val, bitmask);
+		} else if (mCurText.contains("&")) {
+			parts = mCurText.split("&");
+			val = Integer.parseInt(parts[0]);
+			bitmask = Integer.parseInt(parts[1]);
+			return bitwiseAnd(val, bitmask);
+		} else if (mCurText.contains("^")) {
+			parts = mCurText.split("^");
+			val = Integer.parseInt(parts[0]);
+			bitmask = Integer.parseInt(parts[1]);
+			return bitwiseXor(val, bitmask);
+		} else if (mCurText.contains("~")) {
+			val = Integer.parseInt(mCurText.subSequence(1, mCurText.length())
+					.toString());
+			return bitwiseComplement(val);
+		} else {
+			return mCurText;
+		}
 	}
 
-	public String onOperation(CharSequence keyText) {
-		return mCurText.toString() + " " + keyText.toString() + " ";
+	public String onOperation(String keyText) {
+		if (hasOperator) {
+			return mCurText;
+		} else {
+			hasOperator = true;
+			return mCurText + keyText;
+		}
 	}
 
-	public String onNumber(CharSequence keyText) {
-		return mCurText.toString() + keyText.toString();
+	public String onNumber(String keyText) {
+		return mCurText + keyText;
+	}
+
+	public String bitwiseAnd(int val, int bitmask) {
+		return Integer.toString(val & bitmask);
+	}
+
+	public String bitwiseOr(int val, int bitmask) {
+		return Integer.toString(val | bitmask);
+	}
+
+	public String bitwiseXor(int val, int bitmask) {
+		return Integer.toString(val ^ bitmask);
+	}
+
+	public String bitwiseShiftLeft(int val, int bitmask) {
+		return Integer.toString(val << bitmask);
+	}
+
+	public String bitwiseShiftRight(int val, int bitmask) {
+		return Integer.toString(val >> bitmask);
+	}
+
+	public String bitwiseComplement(int val) {
+		return Integer.toString(~val);
 	}
 
 	private final Integer[] buttonResources = { R.string.SHIFT_LEFT,

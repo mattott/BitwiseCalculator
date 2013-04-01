@@ -1,9 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/action_settings"/>
+   <group android:checkableBehavior="single">
+        <item android:id="@+id/bin"
+              android:title="@string/bin" />
+        <item android:id="@+id/oct"
+              android:title="@string/oct" />
+        <item android:id="@+id/dec"
+              android:title="@string/dec" />
+        <item android:id="@+id/hex"
+              android:title="@string/hex" />
+    </group>
 
 </menu>
