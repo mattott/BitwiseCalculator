@@ -21,9 +21,11 @@ public class MainActivity extends Activity {
 	// allows new operators to be called on operands
 	boolean hasOperator = false;
 	Integer[] buttonResources;
-	private ArrayAdapter<String> aa;
+	private ArrayAdapter<String> opAdapter;
+	private ArrayAdapter<String> numAdapter;
 	// this must be initialized outside of onCreate in order to update
-	private ArrayList<String> arrayList = new ArrayList<String>();
+	private ArrayList<String> opList = new ArrayList<String>();
+	private ArrayList<String> numList = new ArrayList<String>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +33,8 @@ public class MainActivity extends Activity {
 		// inflate the view
 		setContentView(R.layout.activity_main);
 		// initialize the grid and text views
-		GridView gV = (GridView) findViewById(R.id.keypad_view);
+		GridView oV = (GridView) findViewById(R.id.operator_view);
+		GridView nV = (GridView) findViewById(R.id.numbers_view);
 		tV = (TextView) findViewById(R.id.display_view);
 		// keypad numbers depends on radix
 		switch (radix) {
@@ -49,45 +52,46 @@ public class MainActivity extends Activity {
 		}
 		// add the operator strings to the arraylist
 		for (int i = 0; i < operators.length; i++) {
-			arrayList.add(getString(operators[i]));
+			opList.add(getString(operators[i]));
 		}
 		// add the number keys to the arraylist
 		for (int i = 0; i < buttonResources.length; i++) {
-			arrayList.add(getString(buttonResources[i]));
+			numList.add(getString(buttonResources[i]));
 		}
 		// bind the arraylist to the arrayadapter
-		aa = new ArrayAdapter<String>(this, R.layout.button_layout, arrayList);
+		opAdapter = new ArrayAdapter<String>(this, R.layout.button_layout,
+				opList);
+		numAdapter = new ArrayAdapter<String>(this, R.layout.button_layout,
+				numList);
 		// clicklistener calls operator methods
-		OnItemClickListener mClickListener = new OnItemClickListener() {
+		OnItemClickListener opClickListener = new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
-				String text;
-				if (position < operators.length) {
-					if (operators[position] == R.string.DELETE) {
-						text = onDeletePressed();
-					} else if (operators[position] == R.string.CALCULATE) {
-						if (mCurText.length() > 1)
-							text = onCalculatePressed();
-						else
-							text = mCurText;
-					} else {
-						if (hasOperator) {
-							text = mCurText;
-						} else {
-							text = onOperationPressed(arrayList.get(position));
-						}
-					}
-				} else {
-					text = onNumberPressed(arrayList.get(position));
+				if (operators[position] == R.string.DELETE) {
+					mCurText = onDeletePressed();
+				} else if (operators[position] == R.string.CALCULATE
+						&& mCurText.length() > 1) {
+					mCurText = onCalculatePressed();
+				} else if (!hasOperator) {
+					mCurText = onOperationPressed(opList.get(position));
 				}
-				mCurText = text;
-				tV.setText(text);
+				tV.setText(mCurText);
+			}
+		};
+		OnItemClickListener numClickListener = new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View v,
+					int position, long id) {
+				mCurText = onNumberPressed(numList.get(position));
+				tV.setText(mCurText);
 			}
 		};
 		// bind keypad adapter to gridview
-		gV.setAdapter(aa);
-		gV.setOnItemClickListener(mClickListener);
+		oV.setAdapter(opAdapter);
+		oV.setOnItemClickListener(opClickListener);
+		nV.setAdapter(numAdapter);
+		nV.setOnItemClickListener(numClickListener);
 	}
 
 	@Override
@@ -99,22 +103,17 @@ public class MainActivity extends Activity {
 
 	// update the arraylist and refresh gridview on base change
 	public void updateDataSet(Integer[] newResources) {
-		int i = arrayList.size() - 1;
-		// remove the old base numbers
-		while (i >= operators.length) {
-			arrayList.remove(i);
-			i = arrayList.size() - 1;
-		}
+		numList.clear();
 		buttonResources = newResources;
 		// add the new base numbers
 		for (int j = 0; j < newResources.length; j++) {
-			arrayList.add(getString(newResources[j]));
+			numList.add(getString(newResources[j]));
 		}
 		mCurText = "";
 		// allow a new operator to be called
 		hasOperator = false;
 		tV.setText(mCurText);
-		aa.notifyDataSetChanged();
+		numAdapter.notifyDataSetChanged();
 	}
 
 	@Override

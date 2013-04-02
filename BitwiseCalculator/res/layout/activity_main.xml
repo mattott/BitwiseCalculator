@@ -26,9 +26,13 @@
         android:textSize="30sp" />
 
     <GridView
-        android:id="@+id/keypad_view"
+        android:id="@+id/operator_view"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:numColumns="4" />
-
+    <GridView 
+        android:id="@+id/numbers_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numColumns="4" />
 </LinearLayout>
