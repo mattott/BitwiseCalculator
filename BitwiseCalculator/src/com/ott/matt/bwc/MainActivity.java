@@ -59,9 +59,9 @@ public class MainActivity extends Activity {
 			numList.add(getString(buttonResources[i]));
 		}
 		// bind the arraylist to the arrayadapter
-		opAdapter = new ArrayAdapter<String>(this, R.layout.button_layout,
+		opAdapter = new ArrayAdapter<String>(this, R.layout.operation_layout,
 				opList);
-		numAdapter = new ArrayAdapter<String>(this, R.layout.button_layout,
+		numAdapter = new ArrayAdapter<String>(this, R.layout.numbers_layout,
 				numList);
 		// clicklistener calls operator methods
 		OnItemClickListener opClickListener = new OnItemClickListener() {
