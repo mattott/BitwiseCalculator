@@ -30,6 +30,6 @@
     <string name="XOR">&#94;</string>
     <string name="NOT">&#126;</string>
     <string name="CALCULATE">&#61;</string>
-    <string name="DELETE">DELETE</string>
+    <string name="DELETE">DEL</string>
 
 </resources>

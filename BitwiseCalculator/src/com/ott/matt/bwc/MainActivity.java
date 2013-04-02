@@ -56,8 +56,7 @@ public class MainActivity extends Activity {
 			arrayList.add(getString(buttonResources[i]));
 		}
 		// bind the arraylist to the arrayadapter
-		aa = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1, arrayList);
+		aa = new ArrayAdapter<String>(this, R.layout.button_layout, arrayList);
 		// clicklistener calls operator methods
 		OnItemClickListener mClickListener = new OnItemClickListener() {
 			@Override
@@ -70,7 +69,11 @@ public class MainActivity extends Activity {
 					} else if (operators[position] == R.string.CALCULATE) {
 						text = onCalculatePressed();
 					} else {
-						text = onOperationPressed(arrayList.get(position));
+						if (hasOperator) {
+							text = mCurText;
+						} else {
+							text = onOperationPressed(arrayList.get(position));
+						}
 					}
 				} else {
 					text = onNumberPressed(arrayList.get(position));
@@ -186,7 +189,6 @@ public class MainActivity extends Activity {
 
 	// calls the bitwise operation(s) on the operand(s)
 	public String onCalculatePressed() {
-		hasOperator = false;
 		String[] parts;
 		int val, bitmask;
 		boolean endsWithNumber = String.valueOf(
@@ -198,30 +200,36 @@ public class MainActivity extends Activity {
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
 			bitwiseShiftLeft(val, bitmask);
+			hasOperator = false;
 		} else if (mCurText.contains(">>") && endsWithNumber) {
 			parts = mCurText.split(">>");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
 			bitwiseShiftRight(val, bitmask);
-		} else if (mCurText.contains("|") && endsWithNumber) { 
+			hasOperator = false;
+		} else if (mCurText.contains("|") && endsWithNumber) {
 			parts = mCurText.split("\\|");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
 			bitwiseOr(val, bitmask);
+			hasOperator = false;
 		} else if (mCurText.contains("&") && endsWithNumber) {
 			parts = mCurText.split("&");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
 			bitwiseAnd(val, bitmask);
+			hasOperator = false;
 		} else if (mCurText.contains("^") && endsWithNumber) {
 			parts = mCurText.split("\\^");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
 			bitwiseXor(val, bitmask);
+			hasOperator = false;
 		} else if (mCurText.startsWith("~") && endsWithNumber) {
 			val = Integer.parseInt(mCurText.subSequence(1, mCurText.length())
 					.toString(), radix);
 			bitwiseComplement(val);
+			hasOperator = false;
 		}
 		return mCurText;
 	}
