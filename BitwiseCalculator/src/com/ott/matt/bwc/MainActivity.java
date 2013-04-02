@@ -67,7 +67,10 @@ public class MainActivity extends Activity {
 					if (operators[position] == R.string.DELETE) {
 						text = onDeletePressed();
 					} else if (operators[position] == R.string.CALCULATE) {
-						text = onCalculatePressed();
+						if (mCurText.length() > 1)
+							text = onCalculatePressed();
+						else
+							text = mCurText;
 					} else {
 						if (hasOperator) {
 							text = mCurText;
@@ -118,7 +121,7 @@ public class MainActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	// options menu allows user to change the number base
@@ -183,6 +186,7 @@ public class MainActivity extends Activity {
 				return (String) mCurText.subSequence(0, mCurText.length() - 1);
 			}
 		} else {
+			hasOperator = false;
 			return "";
 		}
 	}
@@ -191,35 +195,37 @@ public class MainActivity extends Activity {
 	public String onCalculatePressed() {
 		String[] parts;
 		int val, bitmask;
+		boolean beginsWithNumber = String.valueOf(mCurText.charAt(0)).matches(
+				"[0-9a-zA-Z]");
 		boolean endsWithNumber = String.valueOf(
-				mCurText.charAt(mCurText.length() - 1))
-				.matches(("[0-9a-zA-Z]"));
+				mCurText.charAt(mCurText.length() - 1)).matches("[0-9a-zA-Z]");
 
-		if (mCurText.contains("<<") && endsWithNumber) {
+		if (beginsWithNumber && mCurText.contains("<<") && endsWithNumber) {
 			parts = mCurText.split("<<");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
 			bitwiseShiftLeft(val, bitmask);
 			hasOperator = false;
-		} else if (mCurText.contains(">>") && endsWithNumber) {
+		} else if (beginsWithNumber && mCurText.contains(">>")
+				&& endsWithNumber) {
 			parts = mCurText.split(">>");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
 			bitwiseShiftRight(val, bitmask);
 			hasOperator = false;
-		} else if (mCurText.contains("|") && endsWithNumber) {
+		} else if (beginsWithNumber && mCurText.contains("|") && endsWithNumber) {
 			parts = mCurText.split("\\|");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
 			bitwiseOr(val, bitmask);
 			hasOperator = false;
-		} else if (mCurText.contains("&") && endsWithNumber) {
+		} else if (beginsWithNumber && mCurText.contains("&") && endsWithNumber) {
 			parts = mCurText.split("&");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
 			bitwiseAnd(val, bitmask);
 			hasOperator = false;
-		} else if (mCurText.contains("^") && endsWithNumber) {
+		} else if (beginsWithNumber && mCurText.contains("^") && endsWithNumber) {
 			parts = mCurText.split("\\^");
 			val = Integer.parseInt(parts[0], radix);
 			bitmask = Integer.parseInt(parts[1], radix);
