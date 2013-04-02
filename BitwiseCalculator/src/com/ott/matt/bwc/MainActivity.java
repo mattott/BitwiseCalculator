@@ -36,8 +36,7 @@ public class MainActivity extends Activity {
 		final GridView nV = (GridView) findViewById(R.id.numbers_view);
 		final GridView sV = (GridView) findViewById(R.id.special_view);
 		final Spinner radixSpinner = (Spinner) findViewById(R.id.radix_spinner);
-		tV = (TextView) findViewById(R.id.display_view);
-
+		tV = (TextView) findViewById(R.id.display_view);;
 		// initialize the arrayadapters
 		opAdapter = ArrayAdapter.createFromResource(this,
 				R.array.operators_array, R.layout.operation_layout);

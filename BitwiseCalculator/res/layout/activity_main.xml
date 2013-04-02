@@ -28,7 +28,7 @@
             android:scrollHorizontally="true"
             android:singleLine="true"
             android:textColor="@android:color/white"
-            android:textIsSelectable="true"
+            android:textIsSelectable="false"
             android:textSize="30sp" />
 
         <Spinner
