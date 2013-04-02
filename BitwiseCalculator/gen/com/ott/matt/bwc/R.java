@@ -9,8 +9,14 @@ package com.ott.matt.bwc;
 
 public final class R {
     public static final class array {
+        public static final int numbers_array=0x7f060003;
+        /**  not 
+         */
         public static final int operators_array=0x7f060001;
         public static final int radix_array=0x7f060000;
+        /**  delete 
+         */
+        public static final int special_array=0x7f060002;
     }
     public static final class attr {
     }
@@ -27,51 +33,31 @@ public final class R {
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
         public static final int numbers_background=0x7f020001;
-        public static final int operation_background=0x7f020002;
+        public static final int numbers_disabled_background=0x7f020002;
+        public static final int operation_background=0x7f020003;
+        public static final int special_background=0x7f020004;
     }
     public static final class id {
-        public static final int binary_key=0x7f090005;
-        public static final int decimal_key=0x7f090006;
+        public static final int binary_key=0x7f090006;
+        public static final int decimal_key=0x7f090007;
         public static final int display_view=0x7f090001;
         public static final int main=0x7f090000;
         public static final int numbers_view=0x7f090004;
         public static final int operator_view=0x7f090003;
         public static final int radix_spinner=0x7f090002;
+        public static final int special_view=0x7f090005;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
         public static final int numbers_layout=0x7f030001;
         public static final int operation_layout=0x7f030002;
         public static final int operations_fragment=0x7f030003;
+        public static final int special_layout=0x7f030004;
     }
     public static final class menu {
         public static final int main=0x7f080000;
     }
     public static final class string {
-        public static final int AND=0x7f050014;
-        public static final int CALCULATE=0x7f050018;
-        public static final int DELETE=0x7f050019;
-        public static final int EIGHT=0x7f050009;
-        public static final int ELEVEN=0x7f05000c;
-        public static final int FIFTEEN=0x7f050010;
-        public static final int FIVE=0x7f050006;
-        public static final int FOUR=0x7f050005;
-        public static final int FOURTEEN=0x7f05000f;
-        public static final int NINE=0x7f05000a;
-        public static final int NOT=0x7f050017;
-        public static final int ONE=0x7f050002;
-        public static final int OR=0x7f050015;
-        public static final int SEVEN=0x7f050008;
-        public static final int SHIFT_LEFT=0x7f050012;
-        public static final int SHIFT_RIGHT=0x7f050013;
-        public static final int SIX=0x7f050007;
-        public static final int TEN=0x7f05000b;
-        public static final int THIRTEEN=0x7f05000e;
-        public static final int THREE=0x7f050004;
-        public static final int TWELVE=0x7f05000d;
-        public static final int TWO=0x7f050003;
-        public static final int XOR=0x7f050016;
-        public static final int ZERO=0x7f050011;
         public static final int action_settings=0x7f050001;
         public static final int app_name=0x7f050000;
     }
