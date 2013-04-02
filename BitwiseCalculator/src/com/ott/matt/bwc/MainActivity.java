@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
 				String selected = oV.getItemAtPosition(position).toString();
-				if (!hasOperator) {
+				if (!hasOperator && (mCurText.length() > 1 || selected.equalsIgnoreCase("~"))) {
 					mCurText = onOperationPressed(selected);
 				}
 				tV.setText(mCurText);
