@@ -40,11 +40,11 @@ public final class R {
     public static final class id {
         public static final int binary_key=0x7f090006;
         public static final int decimal_key=0x7f090007;
-        public static final int display_view=0x7f090001;
+        public static final int display_view=0x7f090002;
         public static final int main=0x7f090000;
         public static final int numbers_view=0x7f090004;
         public static final int operator_view=0x7f090003;
-        public static final int radix_spinner=0x7f090002;
+        public static final int radix_spinner=0x7f090001;
         public static final int special_view=0x7f090005;
     }
     public static final class layout {
