@@ -11,7 +11,7 @@
         android:top="2dp" />
 
     <size 
-        android:height="50dp"
+        android:height="48dp"
         android:width="100dp" />
 
     <stroke
