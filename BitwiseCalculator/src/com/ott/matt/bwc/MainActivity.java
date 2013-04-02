@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
@@ -23,6 +23,7 @@ public class MainActivity extends Activity {
 	Integer[] buttonResources;
 	private ArrayAdapter<String> opAdapter;
 	private ArrayAdapter<String> numAdapter;
+	private ArrayAdapter<CharSequence> radixAdapter;
 	// this must be initialized outside of onCreate in order to update
 	private ArrayList<String> opList = new ArrayList<String>();
 	private ArrayList<String> numList = new ArrayList<String>();
@@ -35,7 +36,9 @@ public class MainActivity extends Activity {
 		// initialize the grid and text views
 		GridView oV = (GridView) findViewById(R.id.operator_view);
 		GridView nV = (GridView) findViewById(R.id.numbers_view);
+		final Spinner radixSpinner = (Spinner) findViewById(R.id.radix_spinner);
 		tV = (TextView) findViewById(R.id.display_view);
+
 		// keypad numbers depends on radix
 		switch (radix) {
 		case 2:
@@ -92,6 +95,44 @@ public class MainActivity extends Activity {
 		oV.setOnItemClickListener(opClickListener);
 		nV.setAdapter(numAdapter);
 		nV.setOnItemClickListener(numClickListener);
+		OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View v,
+					int position, long id) {
+				String selected = radixSpinner.getSelectedItem().toString();
+				((TextView) parent.getChildAt(0)).setTextColor(getResources()
+						.getColor(android.R.color.white));
+
+				if (selected.startsWith("BIN")) {
+					radix = 2;
+					updateDataSet(binResources);
+				} else if (selected.startsWith("OCT")) {
+					radix = 8;
+					tV.setText(selected);
+					updateDataSet(octResources);
+				} else if (selected.startsWith("DEC")) {
+					radix = 10;
+					updateDataSet(decResources);
+				} else if (selected.startsWith("HEX")) {
+					radix = 16;
+					updateDataSet(hexResources);
+				}
+
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				radix = 2;
+			}
+
+		};
+		radixAdapter = ArrayAdapter.createFromResource(this,
+				R.array.radix_array, android.R.layout.simple_spinner_item);
+		radixAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		radixSpinner.setAdapter(radixAdapter);
+		radixSpinner.setOnItemSelectedListener(spinnerListener);
 	}
 
 	@Override
@@ -114,59 +155,6 @@ public class MainActivity extends Activity {
 		hasOperator = false;
 		tV.setText(mCurText);
 		numAdapter.notifyDataSetChanged();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	// options menu allows user to change the number base
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.bin:
-			if (item.isChecked())
-				item.setChecked(false);
-			else {
-				item.setChecked(true);
-				radix = 2;
-				updateDataSet(binResources);
-			}
-			break;
-		case R.id.oct:
-			if (item.isChecked())
-				break;
-			else {
-				item.setChecked(true);
-				radix = 8;
-				updateDataSet(octResources);
-			}
-			break;
-		case R.id.dec:
-			if (item.isChecked())
-				break;
-			else {
-				item.setChecked(true);
-				radix = 10;
-				updateDataSet(decResources);
-			}
-			break;
-		case R.id.hex:
-			if (item.isChecked())
-				break;
-			else {
-				item.setChecked(true);
-				radix = 16;
-				updateDataSet(hexResources);
-			}
-			break;
-		}
-
-		return super.onOptionsItemSelected(item);
-
 	}
 
 	// deletes the last keypad button

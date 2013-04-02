@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	
+
     <string name="app_name">BitwiseCalculator</string>
     <string name="action_settings">Settings</string>
-    <string name="bin">Binary</string>
-    <string name="oct">Octal</string>
-    <string name="dec">Decimal</string>
-    <string name="hex">Hexadecimal</string>
+
+    <string-array name="radix_array">
+        <item>BIN</item>
+        <item>OCT</item>
+        <item>DEC</item>
+        <item>HEX</item>
+    </string-array>
+    <string-array name="operators_array">
+        <item></item>
+    </string-array>
+
     <string name="ONE">1</string>
     <string name="TWO">2</string>
     <string name="THREE">3</string>
