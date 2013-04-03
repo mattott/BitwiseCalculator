@@ -1,6 +1,7 @@
 package com.ott.matt.bwc;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
+import roboguice.inject.InjectView;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -11,9 +12,19 @@ import android.widget.GridView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends RoboActivity {
+	@InjectView(R.id.operator_view)
+	GridView oV;
+	@InjectView(R.id.numbers_view)
+	GridView nV;
+	@InjectView(R.id.special_view)
+	GridView sV;
+	@InjectView(R.id.radix_spinner)
+	Spinner radixSpinner;
+	@InjectView(R.id.display_view)
+	TextView tV;
+
 	private String mCurText = "";
-	private TextView tV;
 
 	// initialize the radix to binary
 	private int radix = 2;
@@ -29,14 +40,8 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// inflate the view
 		setContentView(R.layout.activity_main);
-		// initialize the grid and text views
-		final GridView oV = (GridView) findViewById(R.id.operator_view);
-		final GridView nV = (GridView) findViewById(R.id.numbers_view);
-		final GridView sV = (GridView) findViewById(R.id.special_view);
-		final Spinner radixSpinner = (Spinner) findViewById(R.id.radix_spinner);
-		tV = (TextView) findViewById(R.id.display_view);
+
 		// initialize the arrayadapters
 		opAdapter = ArrayAdapter.createFromResource(this,
 				R.array.operators_array, R.layout.operation_layout);
@@ -46,7 +51,7 @@ public class MainActivity extends Activity {
 				R.array.numbers_array, R.layout.numbers_layout);
 		numAdapter.setRadix(radix);
 		radixAdapter = ArrayAdapter.createFromResource(this,
-				R.array.radix_array, android.R.layout.simple_spinner_item);
+				R.array.radix_array, R.layout.spinner_item);
 
 		// initialize the click and select listeners
 		OnItemClickListener opClickListener = new OnItemClickListener() {
@@ -54,7 +59,9 @@ public class MainActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
 				String selected = oV.getItemAtPosition(position).toString();
-				if (!hasOperator && (mCurText.length() > 1 || selected.equalsIgnoreCase("~"))) {
+				if (!hasOperator
+						&& (mCurText.length() > 1 || selected
+								.equalsIgnoreCase("~"))) {
 					mCurText = onOperationPressed(selected);
 				}
 				tV.setText(mCurText);
@@ -89,8 +96,6 @@ public class MainActivity extends Activity {
 			public void onItemSelected(AdapterView<?> parent, View v,
 					int position, long id) {
 				String selected = radixSpinner.getSelectedItem().toString();
-				((TextView) parent.getChildAt(0)).setTextColor(getResources()
-						.getColor(android.R.color.white));
 
 				if (selected.startsWith("BIN")) {
 					radix = 2;
@@ -158,16 +163,15 @@ public class MainActivity extends Activity {
 	 * @return the string that will be put back into the textview
 	 */
 	public String onDeletePressed() {
+
 		if (mCurText.length() > 1) {
-			if (mCurText.charAt(mCurText.length() - 1) == '<'
-					|| mCurText.charAt(mCurText.length() - 1) == '>') {
+			char lastChar = mCurText.charAt(mCurText.length() - 1);
+			if (lastChar == '<' || lastChar == '>') {
 				hasOperator = false;
 				return (String) mCurText.subSequence(0, mCurText.length() - 2);
 			} else {
-				if (mCurText.charAt(mCurText.length() - 1) == '|'
-						|| mCurText.charAt(mCurText.length() - 1) == '&'
-						|| mCurText.charAt(mCurText.length() - 1) == '^'
-						|| mCurText.charAt(mCurText.length() - 1) == '~')
+				if (lastChar == '|' || lastChar == '&' || lastChar == '^'
+						|| lastChar == '~')
 					hasOperator = false;
 				return (String) mCurText.subSequence(0, mCurText.length() - 1);
 			}
@@ -183,48 +187,33 @@ public class MainActivity extends Activity {
 	 * @return the answer based on the delimiting operator
 	 */
 	public String onCalculatePressed() {
-		String[] parts;
-		int val, bitmask;
+		int[] operands;
 		boolean beginsWithNumber = String.valueOf(mCurText.charAt(0)).matches(
 				"[0-9a-zA-Z]");
 		boolean endsWithNumber = String.valueOf(
 				mCurText.charAt(mCurText.length() - 1)).matches("[0-9a-zA-Z]");
 
 		if (beginsWithNumber && mCurText.contains("<<") && endsWithNumber) {
-			parts = mCurText.split("<<");
-			val = Integer.parseInt(parts[0], radix);
-			bitmask = Integer.parseInt(parts[1], radix);
-			bitwiseShiftLeft(val, bitmask);
-			hasOperator = false;
+			operands = findOperands("<<");
+			mCurText = Integer.toString(operands[0] << operands[1], radix);
 		} else if (beginsWithNumber && mCurText.contains(">>")
 				&& endsWithNumber) {
-			parts = mCurText.split(">>");
-			val = Integer.parseInt(parts[0], radix);
-			bitmask = Integer.parseInt(parts[1], radix);
-			bitwiseShiftRight(val, bitmask);
-			hasOperator = false;
+			operands = findOperands(">>");
+			mCurText = Integer.toString(operands[0] >> operands[1], radix);
 		} else if (beginsWithNumber && mCurText.contains("|") && endsWithNumber) {
-			parts = mCurText.split("\\|");
-			val = Integer.parseInt(parts[0], radix);
-			bitmask = Integer.parseInt(parts[1], radix);
-			bitwiseOr(val, bitmask);
-			hasOperator = false;
+			operands = findOperands("|");
+			mCurText = Integer.toString(operands[0] | operands[1], radix);
 		} else if (beginsWithNumber && mCurText.contains("&") && endsWithNumber) {
-			parts = mCurText.split("&");
-			val = Integer.parseInt(parts[0], radix);
-			bitmask = Integer.parseInt(parts[1], radix);
-			bitwiseAnd(val, bitmask);
-			hasOperator = false;
+			operands = findOperands("&");
+			mCurText = Integer.toString(operands[0] & operands[1], radix);
 		} else if (beginsWithNumber && mCurText.contains("^") && endsWithNumber) {
-			parts = mCurText.split("\\^");
-			val = Integer.parseInt(parts[0], radix);
-			bitmask = Integer.parseInt(parts[1], radix);
-			bitwiseXor(val, bitmask);
-			hasOperator = false;
+			operands = findOperands("\\^");
+			mCurText = Integer.toString(operands[0] ^ operands[1], radix);
 		} else if (mCurText.startsWith("~") && endsWithNumber) {
-			val = Integer.parseInt(mCurText.subSequence(1, mCurText.length())
-					.toString(), radix);
-			bitwiseComplement(val);
+			int val = Integer.parseInt(
+					mCurText.subSequence(1, mCurText.length()).toString(),
+					radix);
+			mCurText = Integer.toString(~val, radix);
 			hasOperator = false;
 		}
 		return mCurText;
@@ -254,62 +243,11 @@ public class MainActivity extends Activity {
 		return mCurText + keyText;
 	}
 
-	/**
-	 * method: bitwiseAnd(int val, int bitmask)
-	 * 
-	 * @param val
-	 * @param bitmask
-	 */
-	public void bitwiseAnd(int val, int bitmask) {
-		mCurText = Integer.toString(val & bitmask, radix);
-	}
-
-	/**
-	 * method: bitwiseOr(int val, int bitmask)
-	 * 
-	 * @param val
-	 * @param bitmask
-	 */
-	public void bitwiseOr(int val, int bitmask) {
-		mCurText = Integer.toString(val | bitmask, radix);
-	}
-
-	/**
-	 * method: bitwiseXor(int val, int bitmask)
-	 * 
-	 * @param val
-	 * @param bitmask
-	 */
-	public void bitwiseXor(int val, int bitmask) {
-		mCurText = Integer.toString(val ^ bitmask, radix);
-	}
-
-	/**
-	 * method: bitwiseShiftLeft(int val, int bitmask)
-	 * 
-	 * @param val
-	 * @param bitmask
-	 */
-	public void bitwiseShiftLeft(int val, int bitmask) {
-		mCurText = Integer.toString(val << bitmask, radix);
-	}
-
-	/**
-	 * method: bitwiseShiftRight(int val, int bitmask)
-	 * 
-	 * @param val
-	 * @param bitmask
-	 */
-	public void bitwiseShiftRight(int val, int bitmask) {
-		mCurText = Integer.toString(val >> bitmask, radix);
-	}
-
-	/**
-	 * method: bitwiseComplement(int val)
-	 * 
-	 * @param val
-	 */
-	public void bitwiseComplement(int val) {
-		mCurText = Integer.toString(~val, radix);
+	public int[] findOperands(String operator) {
+		String[] parts = mCurText.split(operator);
+		int[] operands = { Integer.parseInt(parts[0], radix),
+				Integer.parseInt(parts[1], radix) };
+		hasOperator = false;
+		return operands;
 	}
 }

@@ -8,14 +8,13 @@
     android:paddingBottom="0dp"
     android:paddingLeft="0dp"
     android:paddingRight="0dp"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingTop="0dp"
     tools:context=".MainActivity" >
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10sp"
-        android:layout_marginTop="10sp"
+        android:layout_weight="4"
         android:gravity="left"
         android:orientation="horizontal" >
 
@@ -23,11 +22,13 @@
             android:id="@+id/radix_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|bottom" />
+            android:layout_gravity="left|center"
+            android:paddingLeft="20sp" />
 
         <HorizontalScrollView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="right|center"
             android:fillViewport="true"
             android:scrollbars="none" >
 
@@ -45,22 +46,36 @@
         </HorizontalScrollView>
     </LinearLayout>
 
-    <GridView
-        android:id="@+id/operator_view"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:numColumns="3" />
+        android:layout_weight="2"
+        android:gravity="left"
+        android:orientation="vertical" >
 
-    <GridView
-        android:id="@+id/numbers_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:numColumns="4" />
+        <GridView
+            android:id="@+id/operator_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:numColumns="3" />
 
-    <GridView
-        android:id="@+id/special_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:numColumns="2" />
+        <com.ott.matt.bwc.DashboardLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <GridView
+                android:id="@+id/numbers_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:numColumns="4" />
+        </com.ott.matt.bwc.DashboardLayout>
+
+        <GridView
+            android:id="@+id/special_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:numColumns="2" />
+    </LinearLayout>
 
 </LinearLayout>

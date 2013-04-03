@@ -38,8 +38,6 @@ public final class R {
         public static final int special_background=0x7f020004;
     }
     public static final class id {
-        public static final int binary_key=0x7f090006;
-        public static final int decimal_key=0x7f090007;
         public static final int display_view=0x7f090002;
         public static final int main=0x7f090000;
         public static final int numbers_view=0x7f090004;
@@ -51,8 +49,8 @@ public final class R {
         public static final int activity_main=0x7f030000;
         public static final int numbers_layout=0x7f030001;
         public static final int operation_layout=0x7f030002;
-        public static final int operations_fragment=0x7f030003;
-        public static final int special_layout=0x7f030004;
+        public static final int special_layout=0x7f030003;
+        public static final int spinner_item=0x7f030004;
     }
     public static final class menu {
         public static final int main=0x7f080000;

@@ -6,7 +6,7 @@
     android:background="@drawable/numbers_background"
     android:gravity="center"
     android:textColor="@android:color/white"
-    android:paddingLeft="6dip"
-    android:paddingRight="6dip"
+    android:paddingLeft="6dp"
+    android:paddingRight="6dp"
     android:textIsSelectable="false"
     android:textSize="40sp" />
