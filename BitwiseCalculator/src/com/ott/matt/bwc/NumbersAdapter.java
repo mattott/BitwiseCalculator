@@ -3,10 +3,13 @@ package com.ott.matt.bwc;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.TextView;
 
 public class NumbersAdapter extends ArrayAdapter<CharSequence> {
@@ -73,6 +76,16 @@ public class NumbersAdapter extends ArrayAdapter<CharSequence> {
 	        convertView = inflater.inflate(R.layout.numbers_layout, null);
 	    }
 	    TextView currentNumber = (TextView) convertView;
+	    DisplayMetrics metrics = new DisplayMetrics();
+	    WindowManager wm = (WindowManager) convertView.getContext().getSystemService(Context.WINDOW_SERVICE);
+	    wm.getDefaultDisplay().getRealMetrics(metrics);
+	    float screenWidth = metrics.widthPixels;
+	    float screenHeight = metrics.heightPixels;
+	    int orientation = convertView.getContext().getResources().getConfiguration().orientation;
+	    if (orientation == 1)
+	    	currentNumber.setLayoutParams(new GridView.LayoutParams((int) (screenWidth/4), (int) (screenHeight/8)));
+	    else
+		    currentNumber.setLayoutParams(new GridView.LayoutParams((int) (screenWidth/8), (int) (screenHeight/5)));
 
 	    if (!isEnabled(position)) {
 	        currentNumber.setBackgroundResource(R.drawable.numbers_disabled_background);

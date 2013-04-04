@@ -32,8 +32,8 @@ public class MainActivity extends RoboActivity {
 	// allows new operators to be called on operands
 	private boolean hasOperator = false;
 
-	private ArrayAdapter<CharSequence> opAdapter;
-	private ArrayAdapter<CharSequence> spAdapter;
+	private OperatorAdapter opAdapter;
+	private SpecialAdapter spAdapter;
 	private NumbersAdapter numAdapter;
 	private ArrayAdapter<CharSequence> radixAdapter;
 
@@ -43,9 +43,9 @@ public class MainActivity extends RoboActivity {
 		setContentView(R.layout.activity_main);
 
 		// initialize the arrayadapters
-		opAdapter = ArrayAdapter.createFromResource(this,
+		opAdapter = OperatorAdapter.createFromResource(this,
 				R.array.operators_array, R.layout.operation_layout);
-		spAdapter = ArrayAdapter.createFromResource(this,
+		spAdapter = SpecialAdapter.createFromResource(this,
 				R.array.special_array, R.layout.special_layout);
 		numAdapter = NumbersAdapter.createFromResource(this,
 				R.array.numbers_array, R.layout.numbers_layout);
@@ -116,6 +116,7 @@ public class MainActivity extends RoboActivity {
 			}
 
 		};
+
 		// bind the adapters to the views
 		oV.setAdapter(opAdapter);
 		oV.setOnItemClickListener(opClickListener);

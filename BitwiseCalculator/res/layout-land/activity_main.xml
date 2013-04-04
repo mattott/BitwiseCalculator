@@ -14,7 +14,9 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="left"
+        android:layout_gravity="bottom"
+        android:layout_weight="1"
+        android:gravity="bottom"
         android:orientation="horizontal" >
 
         <Spinner
@@ -48,31 +50,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="2"
-        android:gravity="left"
+        android:gravity="bottom"
+        android:layout_gravity="bottom"
         android:orientation="vertical" >
-    <GridView
-        android:id="@+id/operator_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:numColumns="6" />
 
-    <com.ott.matt.bwc.DashboardLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        <GridView
+            android:id="@+id/operator_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:numColumns="6" />
 
         <GridView
             android:id="@+id/numbers_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:numColumns="8" />
-    </com.ott.matt.bwc.DashboardLayout>
 
-    <GridView
-        android:id="@+id/special_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:numColumns="2" />
+        <GridView
+            android:id="@+id/special_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:numColumns="2" />
     </LinearLayout>
 
 </LinearLayout>
