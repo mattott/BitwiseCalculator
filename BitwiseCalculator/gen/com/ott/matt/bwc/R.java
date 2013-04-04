@@ -9,14 +9,17 @@ package com.ott.matt.bwc;
 
 public final class R {
     public static final class array {
-        public static final int numbers_array=0x7f060003;
         /**  not 
          */
-        public static final int operators_array=0x7f060001;
+        public static final int bitwise_array=0x7f060001;
+        public static final int numbers_array=0x7f060004;
+        /**  space 
+         */
+        public static final int pemdas_array=0x7f060002;
         public static final int radix_array=0x7f060000;
         /**  delete 
          */
-        public static final int special_array=0x7f060002;
+        public static final int special_array=0x7f060003;
     }
     public static final class attr {
     }
@@ -38,19 +41,21 @@ public final class R {
         public static final int special_background=0x7f020004;
     }
     public static final class id {
-        public static final int display_view=0x7f090002;
+        public static final int display_view=0x7f090001;
         public static final int main=0x7f090000;
         public static final int numbers_view=0x7f090004;
-        public static final int operator_view=0x7f090003;
-        public static final int radix_spinner=0x7f090001;
+        public static final int operator_view=0x7f090006;
+        public static final int pager=0x7f090003;
+        public static final int radix_spinner=0x7f090002;
         public static final int special_view=0x7f090005;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
         public static final int numbers_layout=0x7f030001;
-        public static final int operation_layout=0x7f030002;
-        public static final int special_layout=0x7f030003;
-        public static final int spinner_item=0x7f030004;
+        public static final int operation_fragment_layout=0x7f030002;
+        public static final int operation_layout=0x7f030003;
+        public static final int special_layout=0x7f030004;
+        public static final int spinner_item=0x7f030005;
     }
     public static final class menu {
         public static final int main=0x7f080000;

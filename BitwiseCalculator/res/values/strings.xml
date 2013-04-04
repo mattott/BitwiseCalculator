@@ -10,13 +10,21 @@
         <item>DEC</item>
         <item>HEX</item>
     </string-array>
-    <string-array name="operators_array">
+    <string-array name="bitwise_array">
         <item>&#60;&#60;</item> <!-- shift left -->
         <item>&#62;&#62;</item> <!-- shift right -->
         <item>&amp;</item> <!-- and -->
         <item>|</item> <!-- or -->
         <item>&#94;</item> <!-- xor -->
         <item>&#126;</item> <!-- not -->
+    </string-array>
+    <string-array name="pemdas_array">
+        <item>&#43;</item> <!-- add -->
+        <item>&#8722;</item> <!-- subtract -->
+        <item>&#215;</item> <!-- multiply -->
+        <item>&#247;</item> <!-- divide -->
+        <item>&#37;</item> <!-- modulus -->
+        <item>&#32;</item> <!-- space -->
     </string-array>
     <string-array name="special_array">
         <item>&#61;</item> <!-- calculate -->

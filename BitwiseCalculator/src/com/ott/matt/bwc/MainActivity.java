@@ -1,20 +1,28 @@
 package com.ott.matt.bwc;
 
-import roboguice.activity.RoboActivity;
+import roboguice.activity.RoboFragmentActivity;
 import roboguice.inject.InjectView;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v13.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public class MainActivity extends RoboActivity {
-	@InjectView(R.id.operator_view)
-	GridView oV;
+public class MainActivity extends RoboFragmentActivity {
 	@InjectView(R.id.numbers_view)
 	GridView nV;
 	@InjectView(R.id.special_view)
@@ -23,16 +31,26 @@ public class MainActivity extends RoboActivity {
 	Spinner radixSpinner;
 	@InjectView(R.id.display_view)
 	TextView tV;
+	@InjectView(R.id.pager) ViewPager mPager;
 
 	private String mCurText = "";
 
+	/**
+     * The number of pages to show in the operator fragment.
+     */
+    private static final int NUM_PAGES = 2;
+
+    /**
+     * The pager adapter, which provides the pages to the view pager widget.
+     */
+    private PagerAdapter mPagerAdapter;
+    
 	// initialize the radix to binary
 	private int radix = 2;
 
 	// allows new operators to be called on operands
 	private boolean hasOperator = false;
 
-	private OperatorAdapter opAdapter;
 	private SpecialAdapter spAdapter;
 	private NumbersAdapter numAdapter;
 	private ArrayAdapter<CharSequence> radixAdapter;
@@ -41,10 +59,15 @@ public class MainActivity extends RoboActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		DisplayMetrics metrics = new DisplayMetrics();
+	    WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+	    wm.getDefaultDisplay().getRealMetrics(metrics);
+	    float screenWidth = metrics.widthPixels;
+	    float screenHeight = metrics.heightPixels;
 
 		// initialize the arrayadapters
-		opAdapter = OperatorAdapter.createFromResource(this,
-				R.array.operators_array, R.layout.operation_layout);
+		
 		spAdapter = SpecialAdapter.createFromResource(this,
 				R.array.special_array, R.layout.special_layout);
 		numAdapter = NumbersAdapter.createFromResource(this,
@@ -52,9 +75,21 @@ public class MainActivity extends RoboActivity {
 		numAdapter.setRadix(radix);
 		radixAdapter = ArrayAdapter.createFromResource(this,
 				R.array.radix_array, R.layout.spinner_item);
-
-		// initialize the click and select listeners
-		OnItemClickListener opClickListener = new OnItemClickListener() {
+		mPagerAdapter = new ScreenSlidePagerAdapter(getFragmentManager(), (int)screenWidth,(int) screenHeight/6);
+        mPager.setAdapter(mPagerAdapter);
+        mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                // When changing pages, reset the action bar actions since they are dependent
+                // on which page is currently active. An alternative approach is to have each
+                // fragment expose actions itself (rather than the activity exposing actions),
+                // but for simplicity, the activity provides the actions in this sample.
+                invalidateOptionsMenu();
+            }
+        });
+        
+		/** initialize the click and select listeners
+        OnItemClickListener opClickListener = new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
@@ -66,7 +101,7 @@ public class MainActivity extends RoboActivity {
 				}
 				tV.setText(mCurText);
 			}
-		};
+		};**/
 		OnItemClickListener spClickListener = new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v,
@@ -118,8 +153,6 @@ public class MainActivity extends RoboActivity {
 		};
 
 		// bind the adapters to the views
-		oV.setAdapter(opAdapter);
-		oV.setOnItemClickListener(opClickListener);
 		nV.setAdapter(numAdapter);
 		nV.setOnItemClickListener(numClickListener);
 		sV.setAdapter(spAdapter);
@@ -128,6 +161,9 @@ public class MainActivity extends RoboActivity {
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		radixSpinner.setAdapter(radixAdapter);
 		radixSpinner.setOnItemSelectedListener(spinnerListener);
+    	mPager.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+		
 	}
 
 	/**
@@ -251,4 +287,36 @@ public class MainActivity extends RoboActivity {
 		hasOperator = false;
 		return operands;
 	}
+	
+	/**
+     * A simple pager adapter that represents 2 {@link ScreenSlidePageFragment} objects, in
+     * sequence.
+     */
+    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+    	private int mWidth, mHeight;
+        public ScreenSlidePagerAdapter(FragmentManager fm, int width, int height) {
+            super(fm);
+            mWidth = width;
+        	mHeight = height;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+        	/*switch (page) {
+            case 0: return new MyFirstFragment();
+            case 1: return new MySecondFragment();
+            case 2: return new MyThirdFragment();
+            //and so on....
+        }
+        return null;**/
+    		mPager.setLayoutParams(new LinearLayout.LayoutParams(mWidth, mHeight));
+
+            return ScreenSlidePageFragment.create(position);
+        }
+
+        @Override
+        public int getCount() {
+            return NUM_PAGES;
+        }
+    }
 }
