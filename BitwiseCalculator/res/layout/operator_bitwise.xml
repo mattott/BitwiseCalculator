@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/shL"
+            style="@style/button_style"
+            android:text="@string/shL" />
+
+        <Button
+            android:id="@+id/and"
+            style="@style/button_style"
+            android:text="@string/and" />
+
+        <Button
+            android:id="@+id/xor"
+            style="@style/button_style"
+            android:text="@string/xor" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/shR"
+            style="@style/button_style"
+            android:text="@string/shR" />
+
+        <Button
+            android:id="@+id/or"
+            style="@style/button_style"
+            android:text="@string/or" />
+
+        <Button
+            android:id="@+id/not"
+            style="@style/button_style"
+            android:text="@string/not" />
+    </LinearLayout>
+
+</LinearLayout>

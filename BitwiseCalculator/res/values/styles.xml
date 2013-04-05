@@ -17,4 +17,25 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
+    <style name="button_style">
+        <item name="android:textSize">30dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">#bebebe</item>
+        <item name="android:layout_marginLeft">1dp</item>
+        <item name="android:layout_marginBottom">1dp</item>
+    </style>
+
+    <style name="digit_button_style" parent="button_style">
+        <item name="android:background">#005181</item>
+        <item name="android:textSize">40dp</item>
+    </style>
+
+    <style name="display_button_style" parent="button_style">
+        <item name="android:textSize">12dp</item>
+    </style>
+
 </resources>

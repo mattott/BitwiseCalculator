@@ -2,321 +2,426 @@ package com.ott.matt.bwc;
 
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.inject.InjectView;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.support.v13.app.FragmentStatePagerAdapter;
+import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.GridView;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 public class MainActivity extends RoboFragmentActivity {
-	@InjectView(R.id.numbers_view)
-	GridView nV;
-	@InjectView(R.id.special_view)
-	GridView sV;
-	@InjectView(R.id.radix_spinner)
-	Spinner radixSpinner;
+
+	@InjectView(R.id.delete_button)
+	Button deleteBtn;
+	@InjectView(R.id.equate_button)
+	Button equateBtn;
 	@InjectView(R.id.display_view)
-	TextView tV;
-	@InjectView(R.id.pager) ViewPager mPager;
+	TextView displayView;
+	@InjectView(R.id.operation_pager)
+	ViewPager oPager;
+	@InjectView(R.id.number_pager)
+	ViewPager nPager;
 
 	private String mCurText = "";
-
-	/**
-     * The number of pages to show in the operator fragment.
-     */
-    private static final int NUM_PAGES = 2;
-
-    /**
-     * The pager adapter, which provides the pages to the view pager widget.
-     */
-    private PagerAdapter mPagerAdapter;
-    
-	// initialize the radix to binary
-	private int radix = 2;
-
-	// allows new operators to be called on operands
+	private int radix = 10;
 	private boolean hasOperator = false;
+	private OnClickListener mListener;
 
-	private SpecialAdapter spAdapter;
-	private NumbersAdapter numAdapter;
-	private ArrayAdapter<CharSequence> radixAdapter;
+	private static final String STATE_CURRENT_VIEW = "state-current-view";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		mListener = new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String selectedButtonText = ((Button) v).getText().toString();
+				mCurText += selectedButtonText;
+				displayView.setText(mCurText);
+			}
+		};
+
+		if (oPager != null) {
+			oPager.setAdapter(new OperatorPagerAdapter(oPager));
+		} else {
+			final TypedArray op_buttons = getResources().obtainTypedArray(
+					R.array.bitwise_array);
+			for (int i = 0; i < op_buttons.length(); i++) {
+				setOnClickListener(null, op_buttons.getResourceId(i, 0));
+			}
+			op_buttons.recycle();
+		}
+
+		if (nPager != null) {
+			nPager.setAdapter(new NumberPagerAdapter(nPager));
+		} else {
+			final TypedArray num_buttons = getResources().obtainTypedArray(
+					R.array.hex_buttons);
+			for (int i = 0; i < num_buttons.length(); i++) {
+				setOnClickListener(null, num_buttons.getResourceId(i, 0));
+			}
+			num_buttons.recycle();
+		}
+
+		if (oPager != null) {
+			oPager.setCurrentItem(savedInstanceState == null ? 0
+					: savedInstanceState.getInt(STATE_CURRENT_VIEW, 0));
+		}
+		if (nPager != null) {
+			nPager.setCurrentItem(savedInstanceState == null ? 0
+					: savedInstanceState.getInt(STATE_CURRENT_VIEW, 0));
+		}
 		
+		nPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+				String error = "PageSelected: " + Integer.toString(position);
+				Log.d("Kook", error);
+				switch(position) {
+				case(0): radix = 10; break;
+				case(1): radix = 16; break;
+				case(2): radix = 2; break;
+				case(3): radix = 8; break;
+				}
+				String error1 = "Radix: " + Integer.toString(radix);
+				Log.d("Kook", error1);
+			}
+		});
+
+		WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
 		DisplayMetrics metrics = new DisplayMetrics();
-	    WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-	    wm.getDefaultDisplay().getRealMetrics(metrics);
-	    float screenWidth = metrics.widthPixels;
-	    float screenHeight = metrics.heightPixels;
+		wm.getDefaultDisplay().getMetrics(metrics);
+		int windowWidth = metrics.widthPixels;
+		int windowHeight = metrics.heightPixels;
+		int orientation = getResources().getConfiguration().orientation;
 
-		// initialize the arrayadapters
-		
-		spAdapter = SpecialAdapter.createFromResource(this,
-				R.array.special_array, R.layout.special_layout);
-		numAdapter = NumbersAdapter.createFromResource(this,
-				R.array.numbers_array, R.layout.numbers_layout);
-		numAdapter.setRadix(radix);
-		radixAdapter = ArrayAdapter.createFromResource(this,
-				R.array.radix_array, R.layout.spinner_item);
-		mPagerAdapter = new ScreenSlidePagerAdapter(getFragmentManager(), (int)screenWidth,(int) screenHeight/6);
-        mPager.setAdapter(mPagerAdapter);
-        mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                // When changing pages, reset the action bar actions since they are dependent
-                // on which page is currently active. An alternative approach is to have each
-                // fragment expose actions itself (rather than the activity exposing actions),
-                // but for simplicity, the activity provides the actions in this sample.
-                invalidateOptionsMenu();
-            }
-        });
-        
-		/** initialize the click and select listeners
-        OnItemClickListener opClickListener = new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View v,
-					int position, long id) {
-				String selected = oV.getItemAtPosition(position).toString();
-				if (!hasOperator
-						&& (mCurText.length() > 1 || selected
-								.equalsIgnoreCase("~"))) {
-					mCurText = onOperationPressed(selected);
-				}
-				tV.setText(mCurText);
-			}
-		};**/
-		OnItemClickListener spClickListener = new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View v,
-					int position, long id) {
-				String selected = sV.getItemAtPosition(position).toString();
-				if (selected.startsWith("DEL")) {
-					mCurText = onDeletePressed();
-				} else if (mCurText.length() > 1) {
-					mCurText = onCalculatePressed();
-				}
-				tV.setText(mCurText);
-			}
-		};
-		OnItemClickListener numClickListener = new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View v,
-					int position, long id) {
-				String selected = nV.getItemAtPosition(position).toString();
-				mCurText = onNumberPressed(selected);
-				tV.setText(mCurText);
-			}
-		};
+		oPager.setLayoutParams(new LinearLayout.LayoutParams(
+				LayoutParams.MATCH_PARENT, windowHeight / 4));
+		nPager.setLayoutParams(new LinearLayout.LayoutParams(
+				LayoutParams.MATCH_PARENT, windowHeight / 2));
+		displayView.setLayoutParams(new LinearLayout.LayoutParams(
+				windowWidth * 4 / 5, windowHeight / 6));
+		((View) equateBtn.getParent())
+				.setLayoutParams(new LinearLayout.LayoutParams(windowWidth / 5,
+						LayoutParams.WRAP_CONTENT));
 
-		OnItemSelectedListener spinnerListener = new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View v,
-					int position, long id) {
-				String selected = radixSpinner.getSelectedItem().toString();
-
-				if (selected.startsWith("BIN")) {
-					radix = 2;
-				} else if (selected.startsWith("OCT")) {
-					radix = 8;
-				} else if (selected.startsWith("DEC")) {
-					radix = 10;
-				} else if (selected.startsWith("HEX")) {
-					radix = 16;
-				}
-				updateDataSet(radix);
-
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				radix = 2;
-			}
-
-		};
-
-		// bind the adapters to the views
-		nV.setAdapter(numAdapter);
-		nV.setOnItemClickListener(numClickListener);
-		sV.setAdapter(spAdapter);
-		sV.setOnItemClickListener(spClickListener);
-		radixAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		radixSpinner.setAdapter(radixAdapter);
-		radixSpinner.setOnItemSelectedListener(spinnerListener);
-    	mPager.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
-		
 	}
 
-	/**
-	 * method: onSaveInstanceState(Bundle outState) saves user input
-	 */
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putString("curText", mCurText);
 	}
 
-	/***
-	 * method: updateDataSet(Integer[] newResources)
-	 * 
-	 * @param newResources
-	 *            : the resource array to replace in event of a radix change
-	 */
-	public void updateDataSet(int new_radix) {
-		numAdapter.setRadix(new_radix);
-		for (int position = 0; position < numAdapter.getCount(); position++) {
-			numAdapter.isEnabled(position);
+	public void setOnClickListener(View root, int id) {
+		final View target = root != null ? root.findViewById(id)
+				: findViewById(id);
+		target.setOnClickListener(mListener);
+	}
+
+	public void clickedOperator(String operator) {
+		if (!hasOperator
+				&& (mCurText.length() > 0 || operator.equalsIgnoreCase("~"))) {
+			hasOperator = true;
+			mCurText += operator;
 		}
-		mCurText = "";
-		// allow a new operator to be called
-		hasOperator = false;
-		tV.setText(mCurText);
-		numAdapter.notifyDataSetChanged();
+		displayView.setText(mCurText);
 	}
 
-	/***
-	 * method: onDeletePressed()
-	 * 
-	 * 
-	 * @return the string that will be put back into the textview
-	 */
-	public String onDeletePressed() {
+	public void clickedNumber(String number) {
+		displayView.setText(mCurText + number);
+	}
+
+	public void onDelete(View v) {
 
 		if (mCurText.length() > 1) {
 			char lastChar = mCurText.charAt(mCurText.length() - 1);
 			if (lastChar == '<' || lastChar == '>') {
 				hasOperator = false;
-				return (String) mCurText.subSequence(0, mCurText.length() - 2);
+				mCurText = (String) mCurText.subSequence(0,
+						mCurText.length() - 2);
 			} else {
-				if (lastChar == '|' || lastChar == '&' || lastChar == '^'
-						|| lastChar == '~')
+				if (!Character.isDigit(lastChar)
+						|| !Character.isLetter(lastChar))
 					hasOperator = false;
-				return (String) mCurText.subSequence(0, mCurText.length() - 1);
+				mCurText = (String) mCurText.subSequence(0,
+						mCurText.length() - 1);
 			}
 		} else {
 			hasOperator = false;
-			return "";
+			mCurText = "";
 		}
+		displayView.setText(mCurText);
 	}
 
-	/**
-	 * method: onCalculatePressed()
-	 * 
-	 * @return the answer based on the delimiting operator
-	 */
-	public String onCalculatePressed() {
-		int[] operands;
+	public void onEquate(View v) {
+		if (mCurText.length() < 1) {
+			return;
+		}
+		String[] parts = {};
+		char operator = ' ';
 		boolean beginsWithNumber = String.valueOf(mCurText.charAt(0)).matches(
 				"[0-9a-zA-Z]");
 		boolean endsWithNumber = String.valueOf(
 				mCurText.charAt(mCurText.length() - 1)).matches("[0-9a-zA-Z]");
+		if (beginsWithNumber || endsWithNumber) {
+			for (int i = 0; i < mCurText.length(); i++) {
+				if (!(Character.isDigit(mCurText.charAt(i)))
+						&& !(Character.isLetter(mCurText.charAt(i)))) {
+					char current = mCurText.charAt(i);
+					String error2 = "Kook2: "
+							+ mCurText.substring(i + 1, i + 2);
+					String error3 = "Kook3: " + Integer.toString(i);
+					String error4 = "Kook4: " + current;
+					Log.d("Kook2", error2);
+					Log.d("Kook3", error3);
+					Log.d("Kook4", error4);
+					if (current == '<' || current == '>')
+						parts = mCurText.split(Character.toString(current)
+								+ current);
+					else if (current == '+' || current == '^' || current == '%')
+						parts = mCurText.split("\\" + current);
+					else
+						parts = mCurText.split(Character.toString(current));
 
-		if (beginsWithNumber && mCurText.contains("<<") && endsWithNumber) {
-			operands = findOperands("<<");
-			mCurText = Integer.toString(operands[0] << operands[1], radix);
-		} else if (beginsWithNumber && mCurText.contains(">>")
-				&& endsWithNumber) {
-			operands = findOperands(">>");
-			mCurText = Integer.toString(operands[0] >> operands[1], radix);
-		} else if (beginsWithNumber && mCurText.contains("|") && endsWithNumber) {
-			operands = findOperands("|");
-			mCurText = Integer.toString(operands[0] | operands[1], radix);
-		} else if (beginsWithNumber && mCurText.contains("&") && endsWithNumber) {
-			operands = findOperands("&");
-			mCurText = Integer.toString(operands[0] & operands[1], radix);
-		} else if (beginsWithNumber && mCurText.contains("^") && endsWithNumber) {
-			operands = findOperands("\\^");
-			mCurText = Integer.toString(operands[0] ^ operands[1], radix);
-		} else if (mCurText.startsWith("~") && endsWithNumber) {
-			int val = Integer.parseInt(
-					mCurText.subSequence(1, mCurText.length()).toString(),
-					radix);
-			mCurText = Integer.toString(~val, radix);
-			hasOperator = false;
-		}
-		return mCurText;
-	}
-
-	/**
-	 * method onOperationPressed(String keyText)
-	 * 
-	 * @param keyText
-	 *            - the value of the operator that was pressed
-	 * @return the old text plus the operator
-	 */
-	public String onOperationPressed(String keyText) {
-		if (hasOperator) {
-			return mCurText;
-		} else {
-			hasOperator = true;
-			return mCurText + keyText;
-		}
-	}
-
-	/**
-	 * method: onNumberPressed(String keyText)
-	 * 
-	 */
-	public String onNumberPressed(String keyText) {
-		return mCurText + keyText;
-	}
-
-	public int[] findOperands(String operator) {
-		String[] parts = mCurText.split(operator);
+					operator = current;
+					i = mCurText.length();
+				}
+			}
+			if (operator == ' ')
+				return;
+		} else
+			return;
 		int[] operands = { Integer.parseInt(parts[0], radix),
 				Integer.parseInt(parts[1], radix) };
-		hasOperator = false;
-		return operands;
+
+		switch (operator) {
+		case '<':
+			mCurText = Integer.toString(operands[0] << operands[1], radix);
+			break;
+		case '>':
+			mCurText = Integer.toString(operands[0] >> operands[1], radix);
+			break;
+		case '|':
+			mCurText = Integer.toString(operands[0] | operands[1], radix);
+			break;
+		case '&':
+			mCurText = Integer.toString(operands[0] & operands[1], radix);
+			break;
+		case '^':
+			mCurText = Integer.toString(operands[0] ^ operands[1], radix);
+			break;
+		case '+':
+			mCurText = Integer.toString(operands[0] + operands[1], radix);
+			break;
+		case '-':
+			mCurText = Integer.toString(operands[0] - operands[1], radix);
+			break;
+		case '%':
+			if (operands[1] != 0)
+				mCurText = Integer.toString(operands[0] % operands[1], radix);
+			break;
+		case '~':
+			mCurText = Integer.toString(~operands[0], radix);
+			break;
+		default:
+			break;
+		}
+		displayView.setText(mCurText);
 	}
-	
-	/**
-     * A simple pager adapter that represents 2 {@link ScreenSlidePageFragment} objects, in
-     * sequence.
-     */
-    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
-    	private int mWidth, mHeight;
-        public ScreenSlidePagerAdapter(FragmentManager fm, int width, int height) {
-            super(fm);
-            mWidth = width;
-        	mHeight = height;
-        }
 
-        @Override
-        public Fragment getItem(int position) {
-        	/*switch (page) {
-            case 0: return new MyFirstFragment();
-            case 1: return new MySecondFragment();
-            case 2: return new MyThirdFragment();
-            //and so on....
-        }
-        return null;**/
-    		mPager.setLayoutParams(new LinearLayout.LayoutParams(mWidth, mHeight));
+	class OperatorPagerAdapter extends PagerAdapter {
+		private View mOperator_bitwise;
+		private View mOperator_basic;
 
-            return ScreenSlidePageFragment.create(position);
-        }
+		public OperatorPagerAdapter(ViewPager parent) {
+			final LayoutInflater inflater = LayoutInflater.from(parent
+					.getContext());
+			final View operator_bitwise = inflater.inflate(
+					R.layout.operator_bitwise, parent, false);
+			final View operator_basic = inflater.inflate(
+					R.layout.operator_basic, parent, false);
 
-        @Override
-        public int getCount() {
-            return NUM_PAGES;
-        }
-    }
+			mOperator_bitwise = operator_bitwise;
+			mOperator_basic = operator_basic;
+
+			final Resources res = getResources();
+			final TypedArray bitwise_buttons = res
+					.obtainTypedArray(R.array.bitwise_buttons);
+			for (int i = 0; i < bitwise_buttons.length(); i++) {
+				setOnClickListener(operator_bitwise,
+						bitwise_buttons.getResourceId(i, 0));
+			}
+			bitwise_buttons.recycle();
+
+			final TypedArray basic_buttons = res
+					.obtainTypedArray(R.array.basic_buttons);
+			for (int i = 0; i < basic_buttons.length(); i++) {
+				setOnClickListener(operator_basic,
+						basic_buttons.getResourceId(i, 0));
+			}
+			basic_buttons.recycle();
+		}
+
+		@Override
+		public int getCount() {
+			return 2;
+		}
+
+		@Override
+		public void startUpdate(View container) {
+		}
+
+		@Override
+		public Object instantiateItem(View container, int position) {
+			final View page = position == 0 ? mOperator_basic
+					: mOperator_bitwise;
+			((ViewGroup) container).addView(page);
+			return page;
+		}
+
+		@Override
+		public void destroyItem(View container, int position, Object object) {
+			((ViewGroup) container).removeView((View) object);
+		}
+
+		@Override
+		public void finishUpdate(View container) {
+		}
+
+		@Override
+		public boolean isViewFromObject(View view, Object object) {
+			return view == object;
+		}
+
+		@Override
+		public Parcelable saveState() {
+			return null;
+		}
+
+		@Override
+		public void restoreState(Parcelable state, ClassLoader loader) {
+		}
+	}
+
+	class NumberPagerAdapter extends PagerAdapter {
+		private View mNumber_bin;
+		private View mNumber_oct;
+		private View mNumber_dec;
+		private View mNumber_hex;
+
+		public NumberPagerAdapter(ViewPager parent) {
+			final LayoutInflater inflater = LayoutInflater.from(parent
+					.getContext());
+			final View number_bin = inflater.inflate(R.layout.bin_layout,
+					parent, false);
+			final View number_oct = inflater.inflate(R.layout.oct_layout,
+					parent, false);
+			final View number_dec = inflater.inflate(R.layout.dec_layout,
+					parent, false);
+			final View number_hex = inflater.inflate(R.layout.hex_layout,
+					parent, false);
+
+			mNumber_bin = number_bin;
+			mNumber_oct = number_oct;
+			mNumber_dec = number_dec;
+			mNumber_hex = number_hex;
+
+			final Resources res = getResources();
+
+			final TypedArray hex_buttons = res
+					.obtainTypedArray(R.array.hex_buttons);
+			for (int i = 0; i < hex_buttons.length(); i++) {
+				setOnClickListener(number_hex, hex_buttons.getResourceId(i, 0));
+			}
+			hex_buttons.recycle();
+
+			final TypedArray dec_buttons = res
+					.obtainTypedArray(R.array.dec_buttons);
+			for (int i = 0; i < dec_buttons.length(); i++) {
+				setOnClickListener(number_dec, dec_buttons.getResourceId(i, 0));
+			}
+			dec_buttons.recycle();
+
+			final TypedArray oct_buttons = res
+					.obtainTypedArray(R.array.oct_buttons);
+			for (int i = 0; i < oct_buttons.length(); i++) {
+				setOnClickListener(number_oct, oct_buttons.getResourceId(i, 0));
+			}
+			oct_buttons.recycle();
+
+			final TypedArray bin_buttons = res
+					.obtainTypedArray(R.array.bin_buttons);
+			for (int i = 0; i < bin_buttons.length(); i++) {
+				setOnClickListener(number_bin, bin_buttons.getResourceId(i, 0));
+			}
+			bin_buttons.recycle();
+		}
+
+		@Override
+		public int getCount() {
+			return 4;
+		}
+
+		@Override
+		public void startUpdate(View container) {
+		}
+
+		@Override
+		public Object instantiateItem(View container, int position) {
+			final View page;
+			switch (position) {
+			case (0):
+				page = mNumber_dec;
+				break;
+			case (1):
+				page = mNumber_hex;
+				break;
+			case (2):
+				page = mNumber_bin;
+				break;
+			default:
+				page = mNumber_oct;
+				break;
+			}
+			((ViewGroup) container).addView(page);
+
+			return page;
+		}
+
+		@Override
+		public void destroyItem(View container, int position, Object object) {
+			((ViewGroup) container).removeView((View) object);
+		}
+
+		@Override
+		public void finishUpdate(View container) {
+		}
+
+		@Override
+		public boolean isViewFromObject(View view, Object object) {
+			return view == object;
+		}
+
+		@Override
+		public Parcelable saveState() {
+			return null;
+		}
+
+		@Override
+		public void restoreState(Parcelable state, ClassLoader loader) {
+		}
+	}
+
 }
