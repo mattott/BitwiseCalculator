@@ -19,22 +19,21 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import org.javia.arity.Symbols;
+import org.javia.arity.SyntaxException;
 
 public class MainActivity extends RoboFragmentActivity {
 
 	@InjectView(R.id.delete_button)
-	Button deleteBtn;
-	@InjectView(R.id.equate_button)
-	Button equateBtn;
+	View deleteBtn;
 	@InjectView(R.id.display_view)
 	TextView displayView;
-	@InjectView(R.id.operation_pager)
-	ViewPager oPager;
 	@InjectView(R.id.number_pager)
 	ViewPager nPager;
 
+	private Symbols mSymbols = new Symbols();
 	private String mCurText = "";
-	private int radix = 10;
+	private int mRadix = 10;
 	private boolean hasOperator = false;
 	private OnClickListener mListener;
 
@@ -54,49 +53,36 @@ public class MainActivity extends RoboFragmentActivity {
 			}
 		};
 
-		if (oPager != null) {
-			oPager.setAdapter(new OperatorPagerAdapter(oPager));
-		} else {
-			final TypedArray op_buttons = getResources().obtainTypedArray(
-					R.array.bitwise_array);
-			for (int i = 0; i < op_buttons.length(); i++) {
-				setOnClickListener(null, op_buttons.getResourceId(i, 0));
-			}
-			op_buttons.recycle();
-		}
-
 		if (nPager != null) {
 			nPager.setAdapter(new NumberPagerAdapter(nPager));
 		} else {
 			final TypedArray num_buttons = getResources().obtainTypedArray(
-					R.array.hex_buttons);
+					R.array.dec_buttons);
 			for (int i = 0; i < num_buttons.length(); i++) {
 				setOnClickListener(null, num_buttons.getResourceId(i, 0));
 			}
 			num_buttons.recycle();
 		}
 
-		if (oPager != null) {
-			oPager.setCurrentItem(savedInstanceState == null ? 0
-					: savedInstanceState.getInt(STATE_CURRENT_VIEW, 0));
-		}
 		if (nPager != null) {
 			nPager.setCurrentItem(savedInstanceState == null ? 0
 					: savedInstanceState.getInt(STATE_CURRENT_VIEW, 0));
 		}
-		
+
 		nPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
 				String error = "PageSelected: " + Integer.toString(position);
 				Log.d("Kook", error);
-				switch(position) {
-				case(0): radix = 10; break;
-				case(1): radix = 16; break;
-				case(2): radix = 2; break;
-				case(3): radix = 8; break;
+				switch (position) {
+				case (0):
+					mRadix = 10;
+					break;
+				case (1):
+					mRadix = 16;
+					break;
 				}
-				String error1 = "Radix: " + Integer.toString(radix);
+				String error1 = "Radix: " + Integer.toString(mRadix);
 				Log.d("Kook", error1);
 			}
 		});
@@ -108,16 +94,13 @@ public class MainActivity extends RoboFragmentActivity {
 		int windowHeight = metrics.heightPixels;
 		int orientation = getResources().getConfiguration().orientation;
 
-		oPager.setLayoutParams(new LinearLayout.LayoutParams(
-				LayoutParams.MATCH_PARENT, windowHeight / 4));
 		nPager.setLayoutParams(new LinearLayout.LayoutParams(
-				LayoutParams.MATCH_PARENT, windowHeight / 2));
+				windowWidth * 3 / 5, windowHeight * 15 / 25));
+		((View) deleteBtn.getParent())
+				.setLayoutParams(new LinearLayout.LayoutParams(
+						LayoutParams.MATCH_PARENT, windowHeight * 4 / 25));
 		displayView.setLayoutParams(new LinearLayout.LayoutParams(
-				windowWidth * 4 / 5, windowHeight / 6));
-		((View) equateBtn.getParent())
-				.setLayoutParams(new LinearLayout.LayoutParams(windowWidth / 5,
-						LayoutParams.WRAP_CONTENT));
-
+				LayoutParams.MATCH_PARENT, windowHeight / 5));
 	}
 
 	@Override
@@ -130,17 +113,10 @@ public class MainActivity extends RoboFragmentActivity {
 		target.setOnClickListener(mListener);
 	}
 
-	public void clickedOperator(String operator) {
-		if (!hasOperator
-				&& (mCurText.length() > 0 || operator.equalsIgnoreCase("~"))) {
-			hasOperator = true;
-			mCurText += operator;
-		}
+	public void clickedOperator(View v) {
+		String operator = ((Button) v).getText().toString();
+		mCurText += operator;
 		displayView.setText(mCurText);
-	}
-
-	public void clickedNumber(String number) {
-		displayView.setText(mCurText + number);
 	}
 
 	public void onDelete(View v) {
@@ -166,175 +142,187 @@ public class MainActivity extends RoboFragmentActivity {
 	}
 
 	public void onEquate(View v) {
-		if (mCurText.length() < 1) {
+		if (mCurText.length() < 1)
 			return;
-		}
-		String[] parts = {};
+		String result = "";
+		String prefix = "";
 		char operator = ' ';
-		boolean beginsWithNumber = String.valueOf(mCurText.charAt(0)).matches(
-				"[0-9a-zA-Z]");
-		boolean endsWithNumber = String.valueOf(
-				mCurText.charAt(mCurText.length() - 1)).matches("[0-9a-zA-Z]");
-		if (beginsWithNumber || endsWithNumber) {
-			for (int i = 0; i < mCurText.length(); i++) {
-				if (!(Character.isDigit(mCurText.charAt(i)))
-						&& !(Character.isLetter(mCurText.charAt(i)))) {
-					char current = mCurText.charAt(i);
-					String error2 = "Kook2: "
-							+ mCurText.substring(i + 1, i + 2);
-					String error3 = "Kook3: " + Integer.toString(i);
-					String error4 = "Kook4: " + current;
-					Log.d("Kook2", error2);
-					Log.d("Kook3", error3);
-					Log.d("Kook4", error4);
-					if (current == '<' || current == '>')
-						parts = mCurText.split(Character.toString(current)
-								+ current);
-					else if (current == '+' || current == '^' || current == '%')
-						parts = mCurText.split("\\" + current);
-					else
-						parts = mCurText.split(Character.toString(current));
-
-					operator = current;
-					i = mCurText.length();
+		//int last = 0;
+		int end = mCurText.length();
+		for (int i = 0; i < end; i++) {
+			if (isOperator(mCurText.charAt(i))) {
+				if (i == 0) {
+					operator = mCurText.charAt(i);
+					result = operator + mCurText.substring(i, end);
+					Log.d("i==0", "prefix: " + prefix);
+				} else if (i != 0) {
+					try {
+						prefix = evaluateExpression(mCurText.substring(0, i),
+								operator);
+						operator = mCurText.charAt(i);
+						Log.d("i != 0, try.", "prefix: " + prefix + ", i: " + i);
+					} catch (SyntaxException e) {
+						result = "Error";
+					}
+					result = prefix + mCurText.substring(i, end);
+					// last = i;
+					Log.d("i != 0", "result: " + result + ", i: " + i);
 				}
-			}
-			if (operator == ' ')
-				return;
-		} else
-			return;
-		int[] operands = { Integer.parseInt(parts[0], radix),
-				Integer.parseInt(parts[1], radix) };
 
-		switch (operator) {
-		case '<':
-			mCurText = Integer.toString(operands[0] << operands[1], radix);
-			break;
-		case '>':
-			mCurText = Integer.toString(operands[0] >> operands[1], radix);
-			break;
-		case '|':
-			mCurText = Integer.toString(operands[0] | operands[1], radix);
-			break;
-		case '&':
-			mCurText = Integer.toString(operands[0] & operands[1], radix);
-			break;
-		case '^':
-			mCurText = Integer.toString(operands[0] ^ operands[1], radix);
-			break;
-		case '+':
-			mCurText = Integer.toString(operands[0] + operands[1], radix);
-			break;
-		case '-':
-			mCurText = Integer.toString(operands[0] - operands[1], radix);
-			break;
-		case '%':
-			if (operands[1] != 0)
-				mCurText = Integer.toString(operands[0] % operands[1], radix);
-			break;
-		case '~':
-			mCurText = Integer.toString(~operands[0], radix);
-			break;
-		default:
-			break;
+			} else if (i == end - 1)
+				try {
+					Log.d("i == end - 1", "expression: " + result);
+					result = evaluateExpression(result, operator);
+					// prefix + mCurText.substring(last, end), operator);
+					Log.d("i == end - 1", "result: " + result + ", i: " + i);
+				} catch (SyntaxException e) {
+					result = "Error";
+				}
 		}
-		displayView.setText(mCurText);
+
+		displayView.setText(result);
+		mCurText = "";
 	}
 
-	class OperatorPagerAdapter extends PagerAdapter {
-		private View mOperator_bitwise;
-		private View mOperator_basic;
+	public boolean isOperator(char input) {
+		if (Character.isDigit(input) || Character.isLetter(input))
+			return false;
+		else
+			return true;
+	}
 
-		public OperatorPagerAdapter(ViewPager parent) {
-			final LayoutInflater inflater = LayoutInflater.from(parent
-					.getContext());
-			final View operator_bitwise = inflater.inflate(
-					R.layout.operator_bitwise, parent, false);
-			final View operator_basic = inflater.inflate(
-					R.layout.operator_basic, parent, false);
+	public boolean isBitOperator(char input) {
+		for (int i = 0; i < bitwise_operators.length; i++) {
+			if (input == bitwise_operators[i])
+				return true;
+		}
+		return false;
+	}
 
-			mOperator_bitwise = operator_bitwise;
-			mOperator_basic = operator_basic;
+	public String evaluateExpression(String input, char operator)
+			throws SyntaxException {
+		Log.d("evaluateExpression", "input: " + input);
+		if (isBitOperator(operator))
+			return evaluateBitExpression(input, operator);
+		else
+			return convertToRadix(mSymbols.eval(convertToDecimal(input,
+					operator)));
+	}
 
-			final Resources res = getResources();
-			final TypedArray bitwise_buttons = res
-					.obtainTypedArray(R.array.bitwise_buttons);
-			for (int i = 0; i < bitwise_buttons.length(); i++) {
-				setOnClickListener(operator_bitwise,
-						bitwise_buttons.getResourceId(i, 0));
-			}
-			bitwise_buttons.recycle();
+	public String evaluateBitExpression(String input, char operator) {
+		String parts[] = { "", "" };
+		String result = "";
+		switch (operator) {
+		case '<':
+			parts = input.split("<<");
+			result = Integer.toString(
+					Integer.parseInt(parts[0], mRadix) << Integer.parseInt(
+							parts[1], mRadix), mRadix);
+			break;
+		case '>':
+			parts = input.split(">>");
+			result = Integer.toString(
+					Integer.parseInt(parts[0], mRadix) >> Integer.parseInt(
+							parts[1], mRadix), mRadix);
+			break;
+		case '|':
+			parts = input.split("|");
+			result = Integer.toString(Integer.parseInt(parts[0], mRadix)
+					| Integer.parseInt(parts[1], mRadix), mRadix);
+			break;
+		case '&':
+			parts = input.split("\\&");
+			result = Integer.toString(Integer.parseInt(parts[0], mRadix)
+					& Integer.parseInt(parts[1], mRadix), mRadix);
+			break;
+		case '^':
+			parts = input.split("\\^");
+			result = Integer.toString(Integer.parseInt(parts[0], mRadix)
+					^ Integer.parseInt(parts[1], mRadix), mRadix);
+			break;
+		case '~':
+			parts = input.split("\\~");
+			result = Integer.toString(~Integer.parseInt(parts[1], mRadix),
+					mRadix);
+			break;
+		default:
+			Log.d("Kook5:", "default");
+			break;
+		}
+		return result;
+	}
 
-			final TypedArray basic_buttons = res
-					.obtainTypedArray(R.array.basic_buttons);
-			for (int i = 0; i < basic_buttons.length(); i++) {
-				setOnClickListener(operator_basic,
-						basic_buttons.getResourceId(i, 0));
-			}
-			basic_buttons.recycle();
+	public String convertToDecimal(String input, char operator) {
+		if (mRadix == 10 || operator == ' ')
+			return Integer.toString(Integer.parseInt(input, mRadix), mRadix);
+		Log.d("convertToDecimal", "Input1: " + input);
+
+		String parts[] = input.split(Character.toString(operator));
+		char operators[] = new char[2];
+		// int operands[] = new int[10];
+		String result = "";
+		// int p = 0;
+		// int o = 0;
+		boolean firstCharOperator = (isOperator(input.charAt(0))) ? true
+				: false;
+		if (firstCharOperator) {
+			operators[0] = input.charAt(0);
+			// o += 1;
+			input = input.substring(1, input.length());
+			Log.d("convertToDecimal", "Input3: " + input);
 		}
 
-		@Override
-		public int getCount() {
-			return 2;
-		}
+		/**
+		 * for (int i = 0; i < input.length(); i++) { if
+		 * (isOperator(input.charAt(i))) { parts[p] = input.substring(0, i);
+		 * operators[o] = input.charAt(i); p += 1; o += 1; input =
+		 * input.substring(i + 1, input.length()); i = 0;
+		 * Log.d("convertToDecimal", "Input4: " + input);
+		 * 
+		 * } Log.d("convertToDecimal", "EOS:" + Integer.toString(i));
+		 * Log.d("convertToDecimal", "Input: " + input + " Input length: " +
+		 * input.length()); } Log.d("convertToDecimal", "Input: " + input);
+		 * parts[p] = input; for (int i = 0; i <= p; i++) { if (operators[0] ==
+		 * "~") { operands[1] = Integer.parseInt(parts[1], mRadix); break; }
+		 * operands[i] = Integer.parseInt(parts[i], mRadix);
+		 * Log.d("convertToDecimal", "Operands" +
+		 * Integer.toString(operands[i])); }
+		 */
 
-		@Override
-		public void startUpdate(View container) {
-		}
+		if (firstCharOperator)
+			result += operators[0];
+		result += parts[0] + operator + parts[1];
+		/**
+		 * for (int i = firstCharOperator ? 1 : 0; i <= p; i++) { result +=
+		 * Integer.toString(operands[i]); if (i <= o) result += operators[i];
+		 * 
+		 * }
+		 **/
+		Log.d("convertToDecimal", "result: " + result);
+		return result;
+	}
 
-		@Override
-		public Object instantiateItem(View container, int position) {
-			final View page = position == 0 ? mOperator_basic
-					: mOperator_bitwise;
-			((ViewGroup) container).addView(page);
-			return page;
-		}
-
-		@Override
-		public void destroyItem(View container, int position, Object object) {
-			((ViewGroup) container).removeView((View) object);
-		}
-
-		@Override
-		public void finishUpdate(View container) {
-		}
-
-		@Override
-		public boolean isViewFromObject(View view, Object object) {
-			return view == object;
-		}
-
-		@Override
-		public Parcelable saveState() {
-			return null;
-		}
-
-		@Override
-		public void restoreState(Parcelable state, ClassLoader loader) {
-		}
+	public String convertToRadix(double input) {
+		if (mRadix == 10)
+			return Double.toString(input);
+		int fixed = (int) input;
+		String result = Integer.toString(fixed, mRadix);
+		Log.d("convertToRadix", "result: " + result);
+		return result;
 	}
 
 	class NumberPagerAdapter extends PagerAdapter {
-		private View mNumber_bin;
-		private View mNumber_oct;
 		private View mNumber_dec;
 		private View mNumber_hex;
 
 		public NumberPagerAdapter(ViewPager parent) {
 			final LayoutInflater inflater = LayoutInflater.from(parent
 					.getContext());
-			final View number_bin = inflater.inflate(R.layout.bin_layout,
-					parent, false);
-			final View number_oct = inflater.inflate(R.layout.oct_layout,
-					parent, false);
 			final View number_dec = inflater.inflate(R.layout.dec_layout,
 					parent, false);
 			final View number_hex = inflater.inflate(R.layout.hex_layout,
 					parent, false);
 
-			mNumber_bin = number_bin;
-			mNumber_oct = number_oct;
 			mNumber_dec = number_dec;
 			mNumber_hex = number_hex;
 
@@ -354,24 +342,11 @@ public class MainActivity extends RoboFragmentActivity {
 			}
 			dec_buttons.recycle();
 
-			final TypedArray oct_buttons = res
-					.obtainTypedArray(R.array.oct_buttons);
-			for (int i = 0; i < oct_buttons.length(); i++) {
-				setOnClickListener(number_oct, oct_buttons.getResourceId(i, 0));
-			}
-			oct_buttons.recycle();
-
-			final TypedArray bin_buttons = res
-					.obtainTypedArray(R.array.bin_buttons);
-			for (int i = 0; i < bin_buttons.length(); i++) {
-				setOnClickListener(number_bin, bin_buttons.getResourceId(i, 0));
-			}
-			bin_buttons.recycle();
 		}
 
 		@Override
 		public int getCount() {
-			return 4;
+			return 2;
 		}
 
 		@Override
@@ -388,11 +363,8 @@ public class MainActivity extends RoboFragmentActivity {
 			case (1):
 				page = mNumber_hex;
 				break;
-			case (2):
-				page = mNumber_bin;
-				break;
 			default:
-				page = mNumber_oct;
+				page = mNumber_dec;
 				break;
 			}
 			((ViewGroup) container).addView(page);
@@ -424,4 +396,5 @@ public class MainActivity extends RoboFragmentActivity {
 		}
 	}
 
+	private char bitwise_operators[] = { '>', '<', '~', '^', '&', '|' };
 }

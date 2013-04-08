@@ -22,9 +22,9 @@
     </string-array>
     <string-array name="pemdas_array">
         <item>&#43;</item> <!-- add -->
-        <item>&#215;</item> <!-- multiply -->
+        <item>\u00d7</item> <!-- multiply -->
         <item>&#37;</item> <!-- modulus -->
-        <item>&#8722;</item> <!-- subtract -->
+        <item>-</item> <!-- subtract -->
         <item>&#247;</item> <!-- divide -->
         <item>&#46;</item> <!-- space -->
     </string-array>
