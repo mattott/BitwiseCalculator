@@ -107,7 +107,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:onClick="clickedOperator"
                     android:text="@string/and" />
 
                 <Button
@@ -116,7 +115,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:onClick="clickedOperator"
                     android:text="@string/shL" />
             </LinearLayout>
 
@@ -132,7 +130,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:onClick="clickedOperator"
                     android:text="@string/or" />
 
                 <Button
@@ -141,7 +138,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:onClick="clickedOperator"
                     android:text="@string/shR" />
             </LinearLayout>
 
@@ -157,7 +153,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:onClick="clickedOperator"
                     android:text="@string/xor" />
 
                 <Button
@@ -166,7 +161,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:onClick="clickedOperator"
                     android:text="@string/mod" />
             </LinearLayout>
 
@@ -182,7 +176,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:onClick="clickedOperator"
                     android:text="@string/not" />
 
                 <Button

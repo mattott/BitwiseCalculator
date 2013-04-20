@@ -1,5 +1,8 @@
 package com.ott.matt.bwc;
 
+import org.javia.arity.Symbols;
+import org.javia.arity.SyntaxException;
+
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.inject.InjectView;
 import android.content.res.Resources;
@@ -19,8 +22,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import org.javia.arity.Symbols;
-import org.javia.arity.SyntaxException;
 
 public class MainActivity extends RoboFragmentActivity {
 
@@ -33,8 +34,11 @@ public class MainActivity extends RoboFragmentActivity {
 
 	private Symbols mSymbols = new Symbols();
 	private String mCurText = "";
+	private String nums[] = new String[20];
+	private char ops[] = new char[20];
+	private int opIndex = 0;
+	private int numIndex = 0;
 	private int mRadix = 10;
-	private boolean hasOperator = false;
 	private OnClickListener mListener;
 
 	private static final String STATE_CURRENT_VIEW = "state-current-view";
@@ -47,9 +51,10 @@ public class MainActivity extends RoboFragmentActivity {
 		mListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				String selectedButtonText = ((Button) v).getText().toString();
+				char selectedButtonText = ((Button) v).getText().charAt(0);
 				mCurText += selectedButtonText;
 				displayView.setText(mCurText);
+				enqueue(selectedButtonText);
 			}
 		};
 
@@ -92,7 +97,6 @@ public class MainActivity extends RoboFragmentActivity {
 		wm.getDefaultDisplay().getMetrics(metrics);
 		int windowWidth = metrics.widthPixels;
 		int windowHeight = metrics.heightPixels;
-		int orientation = getResources().getConfiguration().orientation;
 
 		nPager.setLayoutParams(new LinearLayout.LayoutParams(
 				windowWidth * 3 / 5, windowHeight * 15 / 25));
@@ -114,74 +118,72 @@ public class MainActivity extends RoboFragmentActivity {
 	}
 
 	public void clickedOperator(View v) {
-		String operator = ((Button) v).getText().toString();
-		mCurText += operator;
+		char selectedButtonText = ((Button) v).getText().charAt(0);
+		mCurText += selectedButtonText;
 		displayView.setText(mCurText);
+		enqueue(selectedButtonText);
 	}
 
 	public void onDelete(View v) {
-
-		if (mCurText.length() > 1) {
-			char lastChar = mCurText.charAt(mCurText.length() - 1);
-			if (lastChar == '<' || lastChar == '>') {
-				hasOperator = false;
-				mCurText = (String) mCurText.subSequence(0,
-						mCurText.length() - 2);
-			} else {
-				if (!Character.isDigit(lastChar)
-						|| !Character.isLetter(lastChar))
-					hasOperator = false;
-				mCurText = (String) mCurText.subSequence(0,
-						mCurText.length() - 1);
-			}
-		} else {
-			hasOperator = false;
-			mCurText = "";
-		}
+		numIndex = opIndex = 0;
+		nums = new String[20];
+		ops = new char[20];
+		mCurText = "";
 		displayView.setText(mCurText);
 	}
 
 	public void onEquate(View v) {
 		if (mCurText.length() < 1)
 			return;
-		String result = "";
-		String prefix = "";
-		char operator = ' ';
-		//int last = 0;
-		int end = mCurText.length();
-		for (int i = 0; i < end; i++) {
-			if (isOperator(mCurText.charAt(i))) {
-				if (i == 0) {
-					operator = mCurText.charAt(i);
-					result = operator + mCurText.substring(i, end);
-					Log.d("i==0", "prefix: " + prefix);
-				} else if (i != 0) {
-					try {
-						prefix = evaluateExpression(mCurText.substring(0, i),
-								operator);
-						operator = mCurText.charAt(i);
-						Log.d("i != 0, try.", "prefix: " + prefix + ", i: " + i);
-					} catch (SyntaxException e) {
-						result = "Error";
-					}
-					result = prefix + mCurText.substring(i, end);
-					// last = i;
-					Log.d("i != 0", "result: " + result + ", i: " + i);
-				}
-
-			} else if (i == end - 1)
-				try {
-					Log.d("i == end - 1", "expression: " + result);
-					result = evaluateExpression(result, operator);
-					// prefix + mCurText.substring(last, end), operator);
-					Log.d("i == end - 1", "result: " + result + ", i: " + i);
-				} catch (SyntaxException e) {
-					result = "Error";
-				}
+		String result = "Error";
+		try {
+			result = eval();
+		} catch (SyntaxException e) {
+			e.printStackTrace();
 		}
-
 		displayView.setText(result);
 		mCurText = "";
+	}
+
+	public void enqueue(char input) {
+		if (isOperator(input))
+			if (mCurText.isEmpty())
+				nums[numIndex] += input;
+			else {
+				ops[opIndex] = input;
+				opIndex += 1;
+				numIndex += 1;
+			}
+		else
+			if (nums[numIndex] == null)
+				nums[numIndex] = Character.toString(input);
+			else
+				nums[numIndex] += input;
+	}
+
+	public String eval() throws SyntaxException {
+		String answer = "";
+		if (numIndex <= opIndex)
+			opIndex = numIndex - 1;
+		toDecimal();
+		int i = 0;
+		while (i <= numIndex - 1) {
+			if (i == 0)
+				answer = evaluateExpression(nums[i] + ops[i] + nums[i + 1],
+						ops[i]);
+			else
+				answer = evaluateExpression(answer + ops[i] + nums[i + 1],
+						ops[i]);
+			i++;
+		}
+		return answer;
+	}
+
+	public void toDecimal() {
+		for (int i = 0; i <= numIndex; i++) {
+			Log.d("input", "Current: " +nums[i]);
+			nums[i] = Integer.toString(Integer.parseInt(nums[i], mRadix));
+		}
 	}
 
 	public boolean isOperator(char input) {
@@ -191,9 +193,9 @@ public class MainActivity extends RoboFragmentActivity {
 			return true;
 	}
 
-	public boolean isBitOperator(char input) {
+	public boolean containsBitwise(String input) {
 		for (int i = 0; i < bitwise_operators.length; i++) {
-			if (input == bitwise_operators[i])
+			if (input.contains(Character.toString(bitwise_operators[i])))
 				return true;
 		}
 		return false;
@@ -201,104 +203,53 @@ public class MainActivity extends RoboFragmentActivity {
 
 	public String evaluateExpression(String input, char operator)
 			throws SyntaxException {
-		Log.d("evaluateExpression", "input: " + input);
-		if (isBitOperator(operator))
-			return evaluateBitExpression(input, operator);
+		if (containsBitwise(input))
+			return evaluateBitwise(input, operator);
 		else
-			return convertToRadix(mSymbols.eval(convertToDecimal(input,
-					operator)));
+			return convertToRadix(mSymbols.eval(input));
 	}
 
-	public String evaluateBitExpression(String input, char operator) {
+	public String evaluateBitwise(String input, char operator) {
 		String parts[] = { "", "" };
 		String result = "";
 		switch (operator) {
 		case '<':
 			parts = input.split("<<");
 			result = Integer.toString(
-					Integer.parseInt(parts[0], mRadix) << Integer.parseInt(
-							parts[1], mRadix), mRadix);
+					Integer.parseInt(parts[0]) << Integer.parseInt(parts[1]),
+					mRadix);
 			break;
 		case '>':
 			parts = input.split(">>");
 			result = Integer.toString(
-					Integer.parseInt(parts[0], mRadix) >> Integer.parseInt(
-							parts[1], mRadix), mRadix);
+					Integer.parseInt(parts[0]) >> Integer.parseInt(parts[1]),
+					mRadix);
 			break;
 		case '|':
 			parts = input.split("|");
-			result = Integer.toString(Integer.parseInt(parts[0], mRadix)
-					| Integer.parseInt(parts[1], mRadix), mRadix);
+			result = Integer.toString(
+					Integer.parseInt(parts[0]) | Integer.parseInt(parts[1]),
+					mRadix);
 			break;
 		case '&':
 			parts = input.split("\\&");
-			result = Integer.toString(Integer.parseInt(parts[0], mRadix)
-					& Integer.parseInt(parts[1], mRadix), mRadix);
+			result = Integer.toString(
+					Integer.parseInt(parts[0]) & Integer.parseInt(parts[1]),
+					mRadix);
 			break;
 		case '^':
 			parts = input.split("\\^");
-			result = Integer.toString(Integer.parseInt(parts[0], mRadix)
-					^ Integer.parseInt(parts[1], mRadix), mRadix);
+			result = Integer.toString(
+					Integer.parseInt(parts[0]) ^ Integer.parseInt(parts[1]),
+					mRadix);
 			break;
 		case '~':
 			parts = input.split("\\~");
-			result = Integer.toString(~Integer.parseInt(parts[1], mRadix),
-					mRadix);
+			result = Integer.toString(~Integer.parseInt(parts[1]), mRadix);
 			break;
 		default:
-			Log.d("Kook5:", "default");
 			break;
 		}
-		return result;
-	}
-
-	public String convertToDecimal(String input, char operator) {
-		if (mRadix == 10 || operator == ' ')
-			return Integer.toString(Integer.parseInt(input, mRadix), mRadix);
-		Log.d("convertToDecimal", "Input1: " + input);
-
-		String parts[] = input.split(Character.toString(operator));
-		char operators[] = new char[2];
-		// int operands[] = new int[10];
-		String result = "";
-		// int p = 0;
-		// int o = 0;
-		boolean firstCharOperator = (isOperator(input.charAt(0))) ? true
-				: false;
-		if (firstCharOperator) {
-			operators[0] = input.charAt(0);
-			// o += 1;
-			input = input.substring(1, input.length());
-			Log.d("convertToDecimal", "Input3: " + input);
-		}
-
-		/**
-		 * for (int i = 0; i < input.length(); i++) { if
-		 * (isOperator(input.charAt(i))) { parts[p] = input.substring(0, i);
-		 * operators[o] = input.charAt(i); p += 1; o += 1; input =
-		 * input.substring(i + 1, input.length()); i = 0;
-		 * Log.d("convertToDecimal", "Input4: " + input);
-		 * 
-		 * } Log.d("convertToDecimal", "EOS:" + Integer.toString(i));
-		 * Log.d("convertToDecimal", "Input: " + input + " Input length: " +
-		 * input.length()); } Log.d("convertToDecimal", "Input: " + input);
-		 * parts[p] = input; for (int i = 0; i <= p; i++) { if (operators[0] ==
-		 * "~") { operands[1] = Integer.parseInt(parts[1], mRadix); break; }
-		 * operands[i] = Integer.parseInt(parts[i], mRadix);
-		 * Log.d("convertToDecimal", "Operands" +
-		 * Integer.toString(operands[i])); }
-		 */
-
-		if (firstCharOperator)
-			result += operators[0];
-		result += parts[0] + operator + parts[1];
-		/**
-		 * for (int i = firstCharOperator ? 1 : 0; i <= p; i++) { result +=
-		 * Integer.toString(operands[i]); if (i <= o) result += operators[i];
-		 * 
-		 * }
-		 **/
-		Log.d("convertToDecimal", "result: " + result);
 		return result;
 	}
 
