@@ -233,7 +233,7 @@ public class MainActivity extends RoboFragmentActivity {
 					mRadix);
 			break;
 		case '|':
-			parts = input.split("|");
+			parts = input.split("\\|");
 			result = Integer.toString(
 					Integer.parseInt(parts[0]) | Integer.parseInt(parts[1]),
 					mRadix);
