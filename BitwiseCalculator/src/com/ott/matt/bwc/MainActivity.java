@@ -12,7 +12,6 @@ import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -84,6 +83,12 @@ public class MainActivity extends RoboFragmentActivity {
 				case (1):
 					mRadix = 16;
 					break;
+				case (2):
+					mRadix = 8;
+					break;
+				case (3):
+					mRadix = 2;
+					break;
 				}
 			}
 		});
@@ -115,7 +120,12 @@ public class MainActivity extends RoboFragmentActivity {
 
 	public void clickedOperator(View v) {
 		char selectedButtonText = ((Button) v).getText().charAt(0);
-		mCurText += selectedButtonText;
+		if (selectedButtonText == '<' || selectedButtonText == '>')
+			mCurText += Character.toString(selectedButtonText)
+					+ Character.toString(selectedButtonText);
+		else
+			mCurText += selectedButtonText;
+
 		displayView.setText(mCurText);
 		enqueue(selectedButtonText);
 	}
@@ -147,59 +157,61 @@ public class MainActivity extends RoboFragmentActivity {
 			opIndex += 1;
 			if (nums[0] != null)
 				numIndex += 1;
-		} else if (nums[numIndex] == null) {
-			Log.d(Character.toString(input) + numIndex, "enqueue");
+		} else if (nums[numIndex] == null)
 			nums[numIndex] = Character.toString(input);
-		} else
+		else
 			nums[numIndex] += input;
 	}
 
 	public String eval() throws SyntaxException {
 		String answer = null;
 		toDecimal();
-		Log.d("numIndex: " + numIndex + ", opIndex: " + opIndex, "eval");
 		if (numIndex == opIndex) {
 			answer = evaluateExpression(nums[0] + ops[0] + nums[1], ops[0]);
-			for (int i = 1; i < numIndex; i++)
+			for (int i = 1; i < numIndex && answer != "Error"; i++)
 				answer = evaluateExpression(answer + ops[i] + nums[i + 1],
 						ops[i]);
 		} else {
 			answer = evaluateExpression(ops[0] + nums[0], ops[0]);
-			Log.d(answer + ops[1] + nums[1], "eval");
-			for (int i = 1; i <= numIndex; i++)
+			for (int i = 1; i <= numIndex && answer != "Error"; i++)
 				answer = evaluateExpression(answer + ops[i] + nums[i], ops[i]);
 		}
-
-		return convertToRadix(Double.parseDouble(answer));
+		if (answer != "Error")
+			return convertToRadix(Double.parseDouble(answer));
+		else
+			return answer;
 	}
 
 	public void toDecimal() {
-		for (int i = 0; i <= numIndex; i++) {
-			if (nums[i] != null)
-				nums[i] = Integer.toString(Integer.parseInt(nums[i], mRadix));
-			Log.d(nums[i], "toDecimal");
-		}
+		if (mRadix != 10)
+			for (int i = 0; i <= numIndex; i++)
+				if (nums[i] != null)
+					nums[i] = Integer.toString(Integer
+							.parseInt(nums[i], mRadix));
 	}
 
 	public boolean isOperator(char input) {
-		if (Character.isDigit(input) || Character.isLetter(input))
+		if (Character.isDigit(input) || Character.isLetter(input)
+				|| input == '.')
 			return false;
 		else
 			return true;
 	}
 
 	public boolean containsBitwise(String input) {
-		for (int i = 0; i < bitwise_operators.length; i++) {
+		for (int i = 0; i < bitwise_operators.length; i++)
 			if (input.contains(Character.toString(bitwise_operators[i])))
 				return true;
-		}
 		return false;
 	}
 
 	public String evaluateExpression(String input, char operator)
 			throws SyntaxException {
 		if (containsBitwise(input))
-			return evaluateBitwise(input, operator);
+			if (input.contains("."))
+				return "Error";
+			else
+				return evaluateBitwise(input, operator);
 		else
 			return Double.toString(mSymbols.eval(input));
 	}
@@ -207,7 +219,6 @@ public class MainActivity extends RoboFragmentActivity {
 	public String evaluateBitwise(String input, char operator) {
 		String parts[] = { "", "" };
 		String result = "";
-		Log.d(input, "evaluateBitwise");
 		switch (operator) {
 		case '<':
 			parts = input.split("<");
@@ -254,13 +265,14 @@ public class MainActivity extends RoboFragmentActivity {
 			return Double.toString(input);
 		int fixed = (int) input;
 		String result = Integer.toString(fixed, mRadix);
-		Log.d("convertToRadix", "result: " + result);
 		return result;
 	}
 
 	class NumberPagerAdapter extends PagerAdapter {
 		private View mNumber_dec;
 		private View mNumber_hex;
+		private View mNumber_oct;
+		private View mNumber_bin;
 
 		public NumberPagerAdapter(ViewPager parent) {
 			final LayoutInflater inflater = LayoutInflater.from(parent
@@ -269,9 +281,14 @@ public class MainActivity extends RoboFragmentActivity {
 					parent, false);
 			final View number_hex = inflater.inflate(R.layout.hex_layout,
 					parent, false);
-
+			final View number_oct = inflater.inflate(R.layout.oct_layout,
+					parent, false);
+			final View number_bin = inflater.inflate(R.layout.bin_layout,
+					parent, false);
 			mNumber_dec = number_dec;
 			mNumber_hex = number_hex;
+			mNumber_oct = number_oct;
+			mNumber_bin = number_bin;
 
 			final Resources res = getResources();
 
@@ -289,11 +306,25 @@ public class MainActivity extends RoboFragmentActivity {
 			}
 			dec_buttons.recycle();
 
+			final TypedArray oct_buttons = res
+					.obtainTypedArray(R.array.oct_buttons);
+			for (int i = 0; i < oct_buttons.length(); i++) {
+				setOnClickListener(number_oct, oct_buttons.getResourceId(i, 0));
+			}
+			oct_buttons.recycle();
+
+			final TypedArray bin_buttons = res
+					.obtainTypedArray(R.array.bin_buttons);
+			for (int i = 0; i < bin_buttons.length(); i++) {
+				setOnClickListener(number_bin, bin_buttons.getResourceId(i, 0));
+			}
+			bin_buttons.recycle();
+
 		}
 
 		@Override
 		public int getCount() {
-			return 2;
+			return 4;
 		}
 
 		@Override
@@ -309,6 +340,12 @@ public class MainActivity extends RoboFragmentActivity {
 				break;
 			case (1):
 				page = mNumber_hex;
+				break;
+			case (2):
+				page = mNumber_oct;
+				break;
+			case (3):
+				page = mNumber_bin;
 				break;
 			default:
 				page = mNumber_dec;

@@ -88,9 +88,9 @@
             android:text="@string/digit0" />
 
         <Button
-            android:id="@+id/placeholder"
+            android:id="@+id/decimal"
             style="@style/digit_button_style"
-            android:text="@string/placeholder" />
+            android:text="@string/decimal" />
     </LinearLayout>
 
 </LinearLayout>

@@ -48,7 +48,7 @@ public final class R {
     public static final class id {
         public static final int add=0x7f090002;
         public static final int and=0x7f090008;
-        public static final int decimal=0x7f090021;
+        public static final int decimal=0x7f09001b;
         public static final int delete_button=0x7f090006;
         public static final int digit0=0x7f090010;
         public static final int digit1=0x7f090011;
@@ -60,12 +60,12 @@ public final class R {
         public static final int digit7=0x7f090012;
         public static final int digit8=0x7f090013;
         public static final int digit9=0x7f090014;
-        public static final int digitA=0x7f09001b;
-        public static final int digitB=0x7f09001c;
-        public static final int digitC=0x7f09001d;
-        public static final int digitD=0x7f09001e;
-        public static final int digitE=0x7f09001f;
-        public static final int digitF=0x7f090020;
+        public static final int digitA=0x7f09001c;
+        public static final int digitB=0x7f09001d;
+        public static final int digitC=0x7f09001e;
+        public static final int digitD=0x7f09001f;
+        public static final int digitE=0x7f090020;
+        public static final int digitF=0x7f090021;
         public static final int display_view=0x7f090001;
         public static final int div=0x7f090005;
         public static final int equate_button=0x7f09000f;

@@ -15,6 +15,7 @@
         <item>@+id/digit7</item>
     </array>
     <array name="dec_buttons">
+        <item>@+id/decimal</item>
         <item>@+id/digit0</item>
         <item>@+id/digit1</item>
         <item>@+id/digit2</item>
