@@ -77,8 +77,6 @@ public class MainActivity extends RoboFragmentActivity {
 		nPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
-				String error = "PageSelected: " + Integer.toString(position);
-				Log.d("Kook", error);
 				switch (position) {
 				case (0):
 					mRadix = 10;
@@ -87,8 +85,6 @@ public class MainActivity extends RoboFragmentActivity {
 					mRadix = 16;
 					break;
 				}
-				String error1 = "Radix: " + Integer.toString(mRadix);
-				Log.d("Kook", error1);
 			}
 		});
 
@@ -146,43 +142,42 @@ public class MainActivity extends RoboFragmentActivity {
 	}
 
 	public void enqueue(char input) {
-		if (isOperator(input))
-			if (mCurText.isEmpty())
-				nums[numIndex] += input;
-			else {
-				ops[opIndex] = input;
-				opIndex += 1;
+		if (isOperator(input)) {
+			ops[opIndex] = input;
+			opIndex += 1;
+			if (nums[0] != null)
 				numIndex += 1;
-			}
-		else
-			if (nums[numIndex] == null)
-				nums[numIndex] = Character.toString(input);
-			else
-				nums[numIndex] += input;
+		} else if (nums[numIndex] == null) {
+			Log.d(Character.toString(input) + numIndex, "enqueue");
+			nums[numIndex] = Character.toString(input);
+		} else
+			nums[numIndex] += input;
 	}
 
 	public String eval() throws SyntaxException {
-		String answer = "";
-		if (numIndex <= opIndex)
-			opIndex = numIndex - 1;
+		String answer = null;
 		toDecimal();
-		int i = 0;
-		while (i <= numIndex - 1) {
-			if (i == 0)
-				answer = evaluateExpression(nums[i] + ops[i] + nums[i + 1],
-						ops[i]);
-			else
+		Log.d("numIndex: " + numIndex + ", opIndex: " + opIndex, "eval");
+		if (numIndex == opIndex) {
+			answer = evaluateExpression(nums[0] + ops[0] + nums[1], ops[0]);
+			for (int i = 1; i < numIndex; i++)
 				answer = evaluateExpression(answer + ops[i] + nums[i + 1],
 						ops[i]);
-			i++;
+		} else {
+			answer = evaluateExpression(ops[0] + nums[0], ops[0]);
+			Log.d(answer + ops[1] + nums[1], "eval");
+			for (int i = 1; i <= numIndex; i++)
+				answer = evaluateExpression(answer + ops[i] + nums[i], ops[i]);
 		}
-		return answer;
+
+		return convertToRadix(Double.parseDouble(answer));
 	}
 
 	public void toDecimal() {
 		for (int i = 0; i <= numIndex; i++) {
-			Log.d("input", "Current: " +nums[i]);
-			nums[i] = Integer.toString(Integer.parseInt(nums[i], mRadix));
+			if (nums[i] != null)
+				nums[i] = Integer.toString(Integer.parseInt(nums[i], mRadix));
+			Log.d(nums[i], "toDecimal");
 		}
 	}
 
@@ -206,21 +201,22 @@ public class MainActivity extends RoboFragmentActivity {
 		if (containsBitwise(input))
 			return evaluateBitwise(input, operator);
 		else
-			return convertToRadix(mSymbols.eval(input));
+			return Double.toString(mSymbols.eval(input));
 	}
 
 	public String evaluateBitwise(String input, char operator) {
 		String parts[] = { "", "" };
 		String result = "";
+		Log.d(input, "evaluateBitwise");
 		switch (operator) {
 		case '<':
-			parts = input.split("<<");
+			parts = input.split("<");
 			result = Integer.toString(
 					Integer.parseInt(parts[0]) << Integer.parseInt(parts[1]),
 					mRadix);
 			break;
 		case '>':
-			parts = input.split(">>");
+			parts = input.split(">");
 			result = Integer.toString(
 					Integer.parseInt(parts[0]) >> Integer.parseInt(parts[1]),
 					mRadix);
