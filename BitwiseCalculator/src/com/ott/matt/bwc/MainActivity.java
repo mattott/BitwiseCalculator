@@ -12,6 +12,7 @@ import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,6 +39,7 @@ public class MainActivity extends RoboFragmentActivity {
 	private int opIndex = 0;
 	private int numIndex = 0;
 	private int mRadix = 10;
+	private boolean mBitshift = false;
 	private OnClickListener mListener;
 
 	private static final String STATE_CURRENT_VIEW = "state-current-view";
@@ -173,13 +175,15 @@ public class MainActivity extends RoboFragmentActivity {
 						ops[i]);
 		} else {
 			answer = evaluateExpression(ops[0] + nums[0], ops[0]);
-			for (int i = 1; i <= numIndex && answer != "Error"; i++)
-				answer = evaluateExpression(answer + ops[i] + nums[i], ops[i]);
+			for (int i = 1; i <= numIndex && answer != "Error"; i++) {
+				answer = evaluateExpression(answer + ops[i] + nums[i], ops[i]);}
 		}
-		if (answer != "Error")
+		if (answer != "Error" && !mBitshift)
 			return convertToRadix(Double.parseDouble(answer));
-		else
+		else {
+			mBitshift = false;
 			return answer;
+		}
 	}
 
 	public void toDecimal() {
@@ -225,12 +229,14 @@ public class MainActivity extends RoboFragmentActivity {
 			result = Integer.toString(
 					Integer.parseInt(parts[0]) << Integer.parseInt(parts[1]),
 					mRadix);
+			mBitshift = true;
 			break;
 		case '>':
 			parts = input.split(">");
 			result = Integer.toString(
 					Integer.parseInt(parts[0]) >> Integer.parseInt(parts[1]),
 					mRadix);
+			mBitshift = true;
 			break;
 		case '|':
 			parts = input.split("\\|");
