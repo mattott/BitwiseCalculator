@@ -3,14 +3,13 @@
 
     <string name="app_name">BitwiseCalculator</string>
     <string name="action_settings">Settings</string>
-    <string name="delete_button">del</string>
+    <string name="delete_button">CLR</string>
     <string name="equate_button">&#61;</string>
-
     <string-array name="radix_array">
-        <item>BIN</item>
-        <item>OCT</item>
-        <item>DEC</item>
-        <item>HEX</item>
+        <item>Hexadecimal</item>
+        <item>Decimal</item>
+        <item>Octal</item>
+        <item>Binary</item>
     </string-array>
     <string-array name="bitwise_array">
         <item>&#60;&#60;</item> <!-- shift left -->

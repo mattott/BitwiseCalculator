@@ -9,20 +9,21 @@ package com.ott.matt.bwc;
 
 public final class R {
     public static final class array {
-        public static final int basic_buttons=0x7f040005;
+        public static final int basic_buttons=0x7f040006;
         public static final int bin_buttons=0x7f040000;
         /**  not 
          */
-        public static final int bitwise_array=0x7f040007;
-        public static final int bitwise_buttons=0x7f040004;
+        public static final int bitwise_array=0x7f040008;
+        public static final int bitwise_buttons_1=0x7f040005;
+        public static final int bitwise_buttons_2=0x7f040004;
         public static final int dec_buttons=0x7f040002;
         public static final int hex_buttons=0x7f040003;
-        public static final int numbers_array=0x7f040009;
+        public static final int numbers_array=0x7f04000a;
         public static final int oct_buttons=0x7f040001;
         /**  space 
          */
-        public static final int pemdas_array=0x7f040008;
-        public static final int radix_array=0x7f040006;
+        public static final int pemdas_array=0x7f040009;
+        public static final int radix_array=0x7f040007;
     }
     public static final class attr {
     }
@@ -43,43 +44,56 @@ public final class R {
         public static final int btn_keyboard_key_dark_pressed_holo=0x7f020003;
         public static final int btn_keyboard_key_light_normal_holo=0x7f020004;
         public static final int btn_keyboard_key_light_pressed_holo=0x7f020005;
-        public static final int ic_launcher=0x7f020006;
+        public static final int delete_selected=0x7f020006;
+        public static final int delete_view_layer=0x7f020007;
+        public static final int digit_not_selected=0x7f020008;
+        public static final int digit_selected=0x7f020009;
+        public static final int digit_selector=0x7f02000a;
+        public static final int equate_selected=0x7f02000b;
+        public static final int equate_view_layer=0x7f02000c;
+        public static final int ic_action_back=0x7f02000d;
+        public static final int ic_launcher=0x7f02000e;
+        public static final int operator_not_selected=0x7f02000f;
+        public static final int operator_selected=0x7f020010;
+        public static final int operator_selector=0x7f020011;
     }
     public static final class id {
-        public static final int add=0x7f090002;
-        public static final int and=0x7f090008;
-        public static final int decimal=0x7f09001b;
-        public static final int delete_button=0x7f090006;
-        public static final int digit0=0x7f090010;
-        public static final int digit1=0x7f090011;
-        public static final int digit2=0x7f090018;
-        public static final int digit3=0x7f090019;
-        public static final int digit4=0x7f090015;
-        public static final int digit5=0x7f090016;
-        public static final int digit6=0x7f090017;
-        public static final int digit7=0x7f090012;
-        public static final int digit8=0x7f090013;
-        public static final int digit9=0x7f090014;
-        public static final int digitA=0x7f09001c;
-        public static final int digitB=0x7f09001d;
-        public static final int digitC=0x7f09001e;
-        public static final int digitD=0x7f09001f;
-        public static final int digitE=0x7f090020;
-        public static final int digitF=0x7f090021;
+        public static final int add=0x7f090018;
+        public static final int and=0x7f090020;
+        public static final int button_fragment=0x7f090005;
+        public static final int dec=0x7f09001f;
+        public static final int decimal=0x7f090017;
+        public static final int delete_view_layer=0x7f090002;
+        public static final int digit0=0x7f090006;
+        public static final int digit1=0x7f090007;
+        public static final int digit2=0x7f090008;
+        public static final int digit3=0x7f090009;
+        public static final int digit4=0x7f09000a;
+        public static final int digit5=0x7f09000b;
+        public static final int digit6=0x7f09000c;
+        public static final int digit7=0x7f09000d;
+        public static final int digit8=0x7f09000e;
+        public static final int digit9=0x7f09000f;
+        public static final int digitA=0x7f090010;
+        public static final int digitB=0x7f090011;
+        public static final int digitC=0x7f090012;
+        public static final int digitD=0x7f090013;
+        public static final int digitE=0x7f090014;
+        public static final int digitF=0x7f090015;
         public static final int display_view=0x7f090001;
-        public static final int div=0x7f090005;
-        public static final int equate_button=0x7f09000f;
+        public static final int div=0x7f09001b;
+        public static final int equate_view_layer=0x7f090003;
         public static final int main=0x7f090000;
-        public static final int mod=0x7f09000d;
-        public static final int mult=0x7f090004;
-        public static final int not=0x7f09000e;
-        public static final int number_pager=0x7f090007;
-        public static final int or=0x7f09000a;
-        public static final int placeholder=0x7f09001a;
-        public static final int shL=0x7f090009;
-        public static final int shR=0x7f09000b;
-        public static final int sub=0x7f090003;
-        public static final int xor=0x7f09000c;
+        public static final int mod=0x7f09001e;
+        public static final int mult=0x7f09001a;
+        public static final int not=0x7f090022;
+        public static final int operations_pager=0x7f090004;
+        public static final int or=0x7f090021;
+        public static final int placeholder=0x7f090016;
+        public static final int shL=0x7f09001c;
+        public static final int shR=0x7f09001d;
+        public static final int sub=0x7f090019;
+        public static final int xor=0x7f090023;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
@@ -89,6 +103,8 @@ public final class R {
         public static final int oct_layout=0x7f030004;
         public static final int operator_basic=0x7f030005;
         public static final int operator_bitwise=0x7f030006;
+        public static final int operator_bitwise_1=0x7f030007;
+        public static final int simple_spinner_dropdown_item=0x7f030008;
     }
     public static final class menu {
         public static final int main=0x7f080000;
@@ -179,6 +195,7 @@ public final class R {
         public static final int AppTheme=0x7f070001;
         public static final int button_style=0x7f070002;
         public static final int digit_button_style=0x7f070003;
-        public static final int display_button_style=0x7f070004;
+        public static final int digit_disabled=0x7f070004;
+        public static final int display_button_style=0x7f070005;
     }
 }

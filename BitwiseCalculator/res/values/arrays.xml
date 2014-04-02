@@ -45,20 +45,22 @@
         <item>@+id/digitE</item>
         <item>@+id/digitF</item>
     </array>
-    <array name="bitwise_buttons">
+    <array name="bitwise_buttons_2">
         <item>@+id/shR</item>
         <item>@+id/shL</item>
-        <item>@+id/xor</item>
+        <item>@+id/mod</item>
+        <item>@+id/dec</item>
+    </array>
+    <array name="bitwise_buttons_1">
         <item>@+id/and</item>
         <item>@+id/or</item>
         <item>@+id/not</item>
+        <item>@+id/xor</item>
     </array>
     <array name="basic_buttons">
         <item>@+id/add</item>
         <item>@+id/sub</item>
         <item>@+id/mult</item>
         <item>@+id/div</item>
-        <item>@+id/mod</item>
-        <item>@+id/decimal</item>
     </array>
 </resources>

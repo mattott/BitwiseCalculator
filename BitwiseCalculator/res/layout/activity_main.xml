@@ -4,197 +4,69 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
-    android:orientation="vertical"
     android:padding="0dp"
+    android:orientation="vertical"
     tools:context=".MainActivity" >
-
-    <LinearLayout
+    
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="bottom|right"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:id="@+id/display_view"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:gravity="right|center_vertical"
-            android:scrollHorizontally="true"
-            android:singleLine="true"
-            android:textColor="@android:color/white"
-            android:textIsSelectable="true"
-            android:textSize="60dp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/add"
-            style="@style/button_style"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="clickedOperator"
-            android:text="@string/add" />
-
-        <Button
-            android:id="@+id/sub"
-            style="@style/button_style"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="clickedOperator"
-            android:text="@string/sub" />
-
-        <Button
-            android:id="@+id/mult"
-            style="@style/button_style"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="clickedOperator"
-            android:text="@string/mult" />
-
-        <Button
-            android:id="@+id/div"
-            style="@style/button_style"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="clickedOperator"
-            android:text="@string/div" />
-
-        <Button
-            android:id="@+id/delete_button"
-            style="@style/button_style"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="onDelete"
-            android:text="@string/delete_button" />
-    </LinearLayout>
-
-    <LinearLayout
+        android:layout_height="128dp"
+        android:layout_weight="1">
+        <ScrollView 
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal" >
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/number_pager"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_margin="0dp"
-            android:padding="0dp" />
-
-        <LinearLayout
+        android:fillViewport="true"
+        >
+        <TextView
+            android:id="@+id/display_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:gravity="right|center_vertical"
+            android:textColor="@android:color/white"
+            android:textIsSelectable="false"
+            android:textSize="30sp" 
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"/>
+    	</ScrollView>
+    	<LinearLayout 
+    	    android:orientation="horizontal"
+    	    android:layout_height="match_parent"
+    	    android:layout_width="match_parent">
+    	    <View
+    	        android:id="@+id/delete_view_layer"
+    	        android:background="@drawable/delete_view_layer"
+    	        android:layout_height="match_parent"
+    	        android:clickable="true"
+    	        android:onClick="onClear"
+    	        android:layout_weight="1"
+    	        android:layout_width="0dp"/>
+    	    <View
+    	        android:id="@+id/equate_view_layer"
+    	        android:background="@drawable/equate_view_layer"
+    	        android:layout_height="match_parent"
+    	        android:clickable="true"
+    	        android:onClick="onEquate"
+    	        android:layout_weight="1"
+    	        android:layout_width="0dp"/>
+    	</LinearLayout>
+    </FrameLayout>
+    
+    
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
-                android:orientation="horizontal" >
-
-                <Button
-                    android:id="@+id/and"
-                    style="@style/button_style"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:onClick="clickedOperator"
-                    android:text="@string/and" />
-
-                <Button
-                    android:id="@+id/shL"
-                    style="@style/button_style"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:onClick="clickedOperator"
-                    android:text="@string/shL" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
-                android:orientation="horizontal" >
-
-                <Button
-                    android:id="@+id/or"
-                    style="@style/button_style"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:onClick="clickedOperator"
-                    android:text="@string/or" />
-
-                <Button
-                    android:id="@+id/shR"
-                    style="@style/button_style"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:onClick="clickedOperator"
-                    android:text="@string/shR" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
-                android:orientation="horizontal" >
-
-                <Button
-                    android:id="@+id/xor"
-                    style="@style/button_style"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:onClick="clickedOperator"
-                    android:text="@string/xor" />
-
-                <Button
-                    android:id="@+id/mod"
-                    style="@style/button_style"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:onClick="clickedOperator"
-                    android:text="@string/mod" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
-                android:orientation="horizontal" >
-
-                <Button
-                    android:id="@+id/not"
-                    style="@style/button_style"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:onClick="clickedOperator"
-                    android:text="@string/not" />
-
-                <Button
-                    android:id="@+id/equate_button"
-                    style="@style/button_style"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:onClick="onEquate"
-                    android:text="@string/equate_button" />
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-
+	<android.support.v4.view.ViewPager
+            android:id="@+id/operations_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:minHeight="32dp"
+          	android:layout_weight="2"
+            android:layout_margin="0dp"
+            android:padding="0dp"/>
+	
+	<FrameLayout
+	     android:id="@+id/button_fragment"
+	     android:layout_width="match_parent"
+	     android:layout_height="wrap_content"
+	     android:layout_weight="3"
+	     android:minHeight="256dp"/>
 </LinearLayout>

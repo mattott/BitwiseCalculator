@@ -3,50 +3,21 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:orientation="vertical" >
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:orientation="horizontal" >
-
+    android:orientation="horizontal" >
         <Button
             android:id="@+id/add"
             style="@style/button_style"
             android:text="@string/add" />
-
-        <Button
-            android:id="@+id/mult"
-            style="@style/button_style"
-            android:text="@string/mult" />
-
-        <Button
-            android:id="@+id/mod"
-            style="@style/button_style"
-            android:text="@string/mod" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:orientation="horizontal" >
-
         <Button
             android:id="@+id/sub"
             style="@style/button_style"
             android:text="@string/sub" />
-
+        <Button
+            android:id="@+id/mult"
+            style="@style/button_style"
+            android:text="@string/mult" />
         <Button
             android:id="@+id/div"
             style="@style/button_style"
             android:text="@string/div" />
-
-        <Button
-            android:id="@+id/decimal"
-            style="@style/button_style"
-            android:text="@string/decimal" />
-    </LinearLayout>
-
 </LinearLayout>

@@ -5,113 +5,146 @@ import org.javia.arity.SyntaxException;
 
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.inject.InjectView;
+import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
+import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.opengl.Visibility;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.v4.view.PagerAdapter;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class MainActivity extends RoboFragmentActivity {
-
-	@InjectView(R.id.delete_button)
-	View deleteBtn;
 	@InjectView(R.id.display_view)
 	TextView displayView;
-	@InjectView(R.id.number_pager)
-	ViewPager nPager;
+	@InjectView(R.id.operations_pager)
+	ViewPager mOperationsPager;
 
 	private Symbols mSymbols = new Symbols();
 	private String mCurText = "";
 	private String nums[] = new String[20];
+	private String[] mSpinnerRadix;
 	private char ops[] = new char[20];
 	private int opIndex = 0;
 	private int numIndex = 0;
 	private int mRadix = 10;
 	private boolean mBitshift = false;
-	private OnClickListener mListener;
+	private DropDownAdapter mDropDownAdapter;
+	private GestureDetectorCompat mViewerDetector;
+	
+	private final OnClickListener mListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			char selectedButtonText = ((Button) v).getText().charAt(0);
+			mCurText += selectedButtonText;
+			displayView.setText(mCurText);
+			enqueue(selectedButtonText);
+		}
+	};
+	
+	interface OnTitleChangedListener {
+        void onTitleChange(String title);
+	}
 
-	private static final String STATE_CURRENT_VIEW = "state-current-view";
+	private void initializeDropDownMenu() {
+		/* Prepare the Drop-down navigation spinner */
+        mDropDownAdapter = new DropDownAdapter(this, R.array.radix_array);
+        mSpinnerRadix = getResources().getStringArray(R.array.radix_array);
+        
+        if (getActionBar() != null) {
+            getActionBar().setListNavigationCallbacks(mDropDownAdapter, new SpinnerItemSelectedListener());
+        }
+        getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+	}
+	
+	private class SpinnerItemSelectedListener implements OnNavigationListener {
+        @Override public boolean onNavigationItemSelected(int itemPosition, long itemId) {  
+        	
+            if (isSwapEligible(itemPosition)) {
+                replaceFragment(itemPosition);
+                return true;
+            } else {
+            	return false;
+            }
+        }
 
+        boolean isSwapEligible(int position) {
+            return !getTitle().toString().equals(mSpinnerRadix[position]);
+        }
+    }
+	
+	void replaceFragment(int itemPosition) {
+		RadixFragment fragment = mDropDownAdapter.getRadix(itemPosition);
+		int result = 0;
+		try {
+			result = Integer.parseInt(mCurText, mRadix);
+		} catch (Exception e) {
+			if (BuildConfig.DEBUG) {
+				Log.d("MainActivity", "Couldn't parse " + mCurText);
+			}
+		}
+		mRadix = fragment.getRadix();
+		if (result != 0) {
+			mCurText = Integer.toString(result, mRadix);
+			displayView.setText(mCurText);
+		}
+		getSupportFragmentManager().beginTransaction().replace(R.id.button_fragment, (Fragment)fragment, fragment.getTitle()).commit();
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
-		mListener = new OnClickListener() {
+        getSupportFragmentManager().beginTransaction().replace(R.id.button_fragment, new HexFragment(), "Hexadecimal").commit();
+        mRadix = 16;
+		initializeDropDownMenu();
+		initializeViewerTouch();
+		mOperationsPager.setAdapter(new OperatorPagerAdapter(mOperationsPager, getResources()));
+		if (getActionBar() != null) {
+            getActionBar().setDisplayShowTitleEnabled(false);
+        }
+	}
+	
+	private void initializeViewerTouch() {
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		int displayWidth = metrics.widthPixels;
+		
+		ViewConfiguration vc = ViewConfiguration.get(this);
+        int touchSlop = vc.getScaledTouchSlop();
+        
+		ViewerGestureListener listener = new ViewerGestureListener(this, displayWidth, touchSlop,250);
+		mViewerDetector = new GestureDetectorCompat(this, listener);
+        findViewById(R.id.display_view).setOnTouchListener(new View.OnTouchListener() {
 			@Override
-			public void onClick(View v) {
-				char selectedButtonText = ((Button) v).getText().charAt(0);
-				mCurText += selectedButtonText;
-				displayView.setText(mCurText);
-				enqueue(selectedButtonText);
-			}
-		};
-
-		if (nPager != null) {
-			nPager.setAdapter(new NumberPagerAdapter(nPager));
-		} else {
-			final TypedArray num_buttons = getResources().obtainTypedArray(
-					R.array.dec_buttons);
-			for (int i = 0; i < num_buttons.length(); i++) {
-				setOnClickListener(null, num_buttons.getResourceId(i, 0));
-			}
-			num_buttons.recycle();
-		}
-
-		if (nPager != null) {
-			nPager.setCurrentItem(savedInstanceState == null ? 0
-					: savedInstanceState.getInt(STATE_CURRENT_VIEW, 0));
-		}
-
-		nPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-			@Override
-			public void onPageSelected(int position) {
-				switch (position) {
-				case (0):
-					mRadix = 10;
-					break;
-				case (1):
-					mRadix = 16;
-					break;
-				case (2):
-					mRadix = 8;
-					break;
-				case (3):
-					mRadix = 2;
-					break;
-				}
+			public boolean onTouch(View v, MotionEvent event) {
+				// TODO Auto-generated method stub
+                return mViewerDetector.onTouchEvent(event);
 			}
 		});
-
-		WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-		DisplayMetrics metrics = new DisplayMetrics();
-		wm.getDefaultDisplay().getMetrics(metrics);
-		int windowWidth = metrics.widthPixels;
-		int windowHeight = metrics.heightPixels;
-
-		nPager.setLayoutParams(new LinearLayout.LayoutParams(
-				windowWidth * 3 / 5, windowHeight * 15 / 25));
-		((View) deleteBtn.getParent())
-				.setLayoutParams(new LinearLayout.LayoutParams(
-						LayoutParams.MATCH_PARENT, windowHeight * 4 / 25));
-		displayView.setLayoutParams(new LinearLayout.LayoutParams(
-				LayoutParams.MATCH_PARENT, windowHeight / 5));
 	}
+	
+	public void setButtonListeners(View parentView, int buttonArrayResource) {
+		final Resources res = getResources();
 
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
+		final TypedArray typedArray = res
+				.obtainTypedArray(buttonArrayResource);
+		for (int i = 0; i < typedArray.length(); i++) {
+			setOnClickListener(parentView, typedArray.getResourceId(i, 0));
+		}
+		typedArray.recycle();
 	}
 
 	public void setOnClickListener(View root, int id) {
@@ -136,8 +169,20 @@ public class MainActivity extends RoboFragmentActivity {
 		numIndex = opIndex = 0;
 		nums = new String[20];
 		ops = new char[20];
+		mCurText.substring(0, mCurText.length() - 2);
+		displayView.setText(mCurText);
+	}
+	
+	public void onClear(View v) {
+		numIndex = opIndex = 0;
+		nums = new String[20];
+		ops = new char[20];
 		mCurText = "";
 		displayView.setText(mCurText);
+	}
+	
+	public void showDeleteView() {
+		findViewById(R.id.delete_view_layer).performClick();
 	}
 
 	public void onEquate(View v) {
@@ -152,17 +197,24 @@ public class MainActivity extends RoboFragmentActivity {
 		displayView.setText(result);
 		mCurText = "";
 	}
+	
+	public void showEquateView() {
+		findViewById(R.id.equate_view_layer).performClick();
+	}
 
 	public void enqueue(char input) {
-		if (isOperator(input)) {
+		if (opIndex >= ops.length) {
+			return;
+		} else if (isOperator(input)) {
 			ops[opIndex] = input;
 			opIndex += 1;
 			if (nums[0] != null)
 				numIndex += 1;
-		} else if (nums[numIndex] == null)
+		} else if (nums[numIndex] == null) {
 			nums[numIndex] = Character.toString(input);
-		else
+		} else {
 			nums[numIndex] += input;
+		}
 	}
 
 	public String eval() throws SyntaxException {
@@ -273,118 +325,6 @@ public class MainActivity extends RoboFragmentActivity {
 		String result = Integer.toString(fixed, mRadix);
 		return result;
 	}
-
-	class NumberPagerAdapter extends PagerAdapter {
-		private View mNumber_dec;
-		private View mNumber_hex;
-		private View mNumber_oct;
-		private View mNumber_bin;
-
-		public NumberPagerAdapter(ViewPager parent) {
-			final LayoutInflater inflater = LayoutInflater.from(parent
-					.getContext());
-			final View number_dec = inflater.inflate(R.layout.dec_layout,
-					parent, false);
-			final View number_hex = inflater.inflate(R.layout.hex_layout,
-					parent, false);
-			final View number_oct = inflater.inflate(R.layout.oct_layout,
-					parent, false);
-			final View number_bin = inflater.inflate(R.layout.bin_layout,
-					parent, false);
-			mNumber_dec = number_dec;
-			mNumber_hex = number_hex;
-			mNumber_oct = number_oct;
-			mNumber_bin = number_bin;
-
-			final Resources res = getResources();
-
-			final TypedArray hex_buttons = res
-					.obtainTypedArray(R.array.hex_buttons);
-			for (int i = 0; i < hex_buttons.length(); i++) {
-				setOnClickListener(number_hex, hex_buttons.getResourceId(i, 0));
-			}
-			hex_buttons.recycle();
-
-			final TypedArray dec_buttons = res
-					.obtainTypedArray(R.array.dec_buttons);
-			for (int i = 0; i < dec_buttons.length(); i++) {
-				setOnClickListener(number_dec, dec_buttons.getResourceId(i, 0));
-			}
-			dec_buttons.recycle();
-
-			final TypedArray oct_buttons = res
-					.obtainTypedArray(R.array.oct_buttons);
-			for (int i = 0; i < oct_buttons.length(); i++) {
-				setOnClickListener(number_oct, oct_buttons.getResourceId(i, 0));
-			}
-			oct_buttons.recycle();
-
-			final TypedArray bin_buttons = res
-					.obtainTypedArray(R.array.bin_buttons);
-			for (int i = 0; i < bin_buttons.length(); i++) {
-				setOnClickListener(number_bin, bin_buttons.getResourceId(i, 0));
-			}
-			bin_buttons.recycle();
-
-		}
-
-		@Override
-		public int getCount() {
-			return 4;
-		}
-
-		@Override
-		public void startUpdate(View container) {
-		}
-
-		@Override
-		public Object instantiateItem(View container, int position) {
-			final View page;
-			switch (position) {
-			case (0):
-				page = mNumber_dec;
-				break;
-			case (1):
-				page = mNumber_hex;
-				break;
-			case (2):
-				page = mNumber_oct;
-				break;
-			case (3):
-				page = mNumber_bin;
-				break;
-			default:
-				page = mNumber_dec;
-				break;
-			}
-			((ViewGroup) container).addView(page);
-
-			return page;
-		}
-
-		@Override
-		public void destroyItem(View container, int position, Object object) {
-			((ViewGroup) container).removeView((View) object);
-		}
-
-		@Override
-		public void finishUpdate(View container) {
-		}
-
-		@Override
-		public boolean isViewFromObject(View view, Object object) {
-			return view == object;
-		}
-
-		@Override
-		public Parcelable saveState() {
-			return null;
-		}
-
-		@Override
-		public void restoreState(Parcelable state, ClassLoader loader) {
-		}
-	}
-
+	
 	private char bitwise_operators[] = { '>', '<', '~', '^', '&', '|' };
 }
